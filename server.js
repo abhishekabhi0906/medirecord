@@ -39,12 +39,21 @@ app.post('/api/upload-image', async (req, res) => {
 });
 
 // GET all patients
+// GET all patients
 app.get('/api/patients', async (req, res) => {
   try {
+    console.log('Fetching patients...');
     const { data, error } = await supabase.from('patients').select('*');
-    if (error) return res.status(500).json(error);
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: error.message, details: error });
+    }
+    
+    console.log('Fetched patients:', data);
     res.json(data || []);
   } catch(e) {
+    console.error('Catch error:', e.message, e);
     res.status(500).json({ error: e.message });
   }
 });
