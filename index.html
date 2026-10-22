@@ -957,7 +957,7 @@
             <label>Patient</label>
             <p style="font-size:1.2rem;font-weight:600">${p.name} <span style="font-size:0.8rem;font-weight:400;color:var(--accent)">${pid}</span></p>
           </div>
-          ${(()=>{ const pics = p.photos||(p.photo?[p.photo]:[]); return pics.length ? '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;flex-shrink:0">'+pics.map(url=>`<img src="${BASE+url}" alt="Photo" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${BASE+url}')"/>`).join('')+'</div>' : ''; })()}
+                    ${(()=>{ const pics = p.photos||[]; return pics.length ? '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;flex-shrink:0">'+pics.map(url=>`<img src="${url}" alt="Photo" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${url}')"/>`).join('')+'</div>' : ''; })()}" alt="Photo" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${BASE+url}')"/>`).join('')+'</div>' : ''; })()}
         </div>
         <div class="view-field"><label>Age</label><p>${p.age ? p.age+' years' : '—'}</p></div>
         <div class="view-field"><label>Gender</label><p>${p.gender||'—'}</p></div>
