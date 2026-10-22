@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Maruti Homoeo Clinic – Patient Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --border: #e2e0d8;
+      --text: #1a1a1a; --muted: #7a7870;
+      --accent: #2a6049; --accent-light: #e8f0ec; --accent-hover: #1e4a37;
+      --danger: #c0392b; --danger-light: #fdecea;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+      --text: #e8e6e0; --muted: #8a8880;
+      --accent: #4caf7d; --accent-light: #1a2e24; --accent-hover: #3d9a6a;
+      --danger: #e05c4b; --danger-light: #2d1a18;
+      --shadow: 0 2px 12px rgba(0,0,0,0.3);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
+
+    /* HEADER */
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; }
+    .logo { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--accent); letter-spacing: -0.5px; }
+    .logo span { color: var(--muted); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; font-weight: 400; margin-left: 0.5rem; }
+    .header-right { display: flex; align-items: center; gap: 0.75rem; }
+    .header-btn { background: var(--accent); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .header-btn:hover { background: var(--accent-hover); }
+    .dark-toggle { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.4rem 0.8rem; font-size: 1rem; cursor: pointer; color: var(--muted); transition: all 0.2s; }
+    .dark-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* TABS */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 2rem; position: sticky; top: 64px; z-index: 99; }
+    .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.85rem 1.2rem; font-family: inherit; font-size: 0.9rem; font-weight: 500; color: var(--muted); cursor: pointer; margin-bottom: -1px; transition: all 0.2s; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn:hover { color: var(--text); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    main { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: nowrap; align-items: center; overflow-x: auto; padding-bottom: 0.1rem; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; z-index: 1; }
+    input[type="text"], input[type="date"], input[type="number"], input[type="tel"], select, textarea {
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text); transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,96,73,0.1); }
+    .search-input { width: 100%; padding: 0.65rem 0.75rem 0.65rem 3.2rem !important; }
+    .filter-date { padding: 0.65rem 0.75rem; min-width: 170px; }
+    .filter-select { padding: 0.65rem 0.75rem; min-width: 140px; }
+    .clear-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.65rem 1rem; font-family: inherit; font-size: 0.85rem; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .clear-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* STATS */
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; flex: 1; min-width: 140px; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 2rem; font-weight: 600; color: var(--accent); margin-top: 0.2rem; }
+
+    /* CHARTS */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+    .chart-title { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+    .chart-container { position: relative; height: 200px; }
+
+    /* TABLE */
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg); border-bottom: 1px solid var(--border); }
+    th { text-align: left; padding: 0.85rem 1rem; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    td { padding: 0.85rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--accent-light); }
+    .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    .sortable-th:hover { color: var(--accent); }
+    #sortIcon { font-size: 0.9rem; opacity: 0.6; margin-left: 4px; }
+
+    .patient-id { font-size: 0.72rem; font-weight: 700; color: var(--accent); background: var(--accent-light); padding: 0.15rem 0.45rem; border-radius: 4px; margin-bottom: 0.2rem; display: inline-block; }
+    .gender-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: 500; }
+    .gender-male { background: #e8f0f8; color: #2563eb; }
+    .gender-female { background: #fce8f3; color: #be185d; }
+    .gender-other { background: #f3e8fc; color: #7c3aed; }
+    .followup-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 99px; font-size: 0.72rem; font-weight: 500; }
+    .followup-soon { background: #fef3c7; color: #b45309; }
+    .followup-past { background: #fdecea; color: #c0392b; }
+    .action-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .btn-icon { border: 1px solid var(--border); background: var(--surface); border-radius: 7px; padding: 0.35rem 0.55rem; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.25rem; color: var(--muted); font-family: inherit; }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-light); }
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state svg { margin-bottom: 1rem; opacity: 0.3; }
+
+    /* MODAL */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+    .overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 650px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--text); }
+    .close-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); line-height: 1; padding: 0.2rem; }
+    .close-btn:hover { color: var(--text); }
+    .modal-body { padding: 1.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    input[type="text"], input[type="date"], input[type="number"], input[type="tel"], select { padding: 0.65rem 0.75rem; width: 100%; }
+    textarea { padding: 0.65rem 0.75rem; width: 100%; min-height: 90px; resize: vertical; }
+    .modal-footer { padding: 1rem 1.5rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; }
+    .btn-secondary { background: none; border: 1px solid var(--border); padding: 0.6rem 1.2rem; border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; cursor: pointer; color: var(--muted); transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--text); color: var(--text); }
+    .btn-primary { background: var(--accent); color: white; border: none; padding: 0.6rem 1.4rem; border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: var(--danger); color: white; border: none; padding: 0.6rem 1.4rem; border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+    .btn-danger:hover { background: #a93226; }
+
+    /* PHONE WRAP */
+    .phone-wrap { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+    .phone-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,96,73,0.1); }
+    .phone-wrap select { border: none !important; border-radius: 0 !important; background: var(--bg); padding: 0.65rem 0.5rem; font-size: 0.85rem; width: auto; box-shadow: none !important; border-right: 1px solid var(--border) !important; flex-shrink: 0; }
+    .phone-wrap select:focus { box-shadow: none !important; border-color: var(--border) !important; }
+    .phone-divider { padding: 0 0.5rem; color: var(--muted); font-size: 1rem; user-select: none; }
+    .phone-wrap input[type="tel"] { border: none !important; border-radius: 0 !important; box-shadow: none !important; flex: 1; padding: 0.65rem 0.5rem; }
+    .phone-wrap input[type="tel"]:focus { box-shadow: none !important; }
+
+    /* DATE INPUT */
+    .date-input-wrap { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--surface); transition: border-color 0.2s, box-shadow 0.2s; }
+    .date-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(42,96,73,0.1); }
+    .date-input-wrap input[type="date"] { border: none !important; border-radius: 0 !important; box-shadow: none !important; flex: 1; padding: 0.65rem 0.75rem; }
+    .date-input-wrap input[type="date"]:focus { box-shadow: none !important; }
+    .today-inline-btn { background: var(--accent-light); border: none; border-left: 1px solid var(--border); padding: 0.65rem 0.75rem; font-family: inherit; font-size: 0.8rem; font-weight: 600; color: var(--accent); cursor: pointer; white-space: nowrap; transition: background 0.2s, color 0.2s; }
+    .today-inline-btn:hover { background: var(--accent); color: white; }
+
+    /* VIEW MODAL */
+    .view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; margin-bottom: 1rem; }
+    .view-field label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.2rem; }
+    .view-field p { font-size: 0.95rem; color: var(--text); line-height: 1.5; }
+    .view-field.full { grid-column: 1 / -1; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+    /* VISIT HISTORY */
+    .visit-item { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; margin-bottom: 0.75rem; }
+    .visit-date { font-size: 0.78rem; font-weight: 600; color: var(--accent); margin-bottom: 0.4rem; }
+    .visit-label { font-size: 0.72rem; text-transform: uppercase; color: var(--muted); margin-bottom: 0.2rem; }
+    .visit-text { font-size: 0.88rem; white-space: pre-wrap; }
+    .add-visit-btn { background: var(--accent-light); border: 1px dashed var(--accent); color: var(--accent); border-radius: var(--radius); padding: 0.6rem 1rem; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; width: 100%; text-align: center; transition: all 0.2s; }
+    .add-visit-btn:hover { background: var(--accent); color: white; }
+
+    /* DELETE */
+    .delete-modal { max-width: 400px; }
+    .delete-msg { color: var(--muted); line-height: 1.6; }
+    .delete-name { color: var(--text); font-weight: 600; }
+
+    /* UNSAVED WARNING */
+    .unsaved-modal { max-width: 400px; }
+
+    /* PHOTO UPLOAD */
+    .photo-upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
+    .photo-upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+    .photo-upload-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .photo-upload-text { font-size: 0.82rem; color: var(--muted); }
+    .photo-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
+    .photo-grid-item { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+    .photo-grid-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; border: 1px solid var(--border); cursor: zoom-in; display: block; transition: transform 0.15s; }
+    .photo-grid-item img:hover { transform: scale(1.05); }
+    .photo-grid-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.65); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .photo-grid-remove:hover { background: var(--danger); }
+    .photo-add-more { width: 80px; height: 80px; border: 2px dashed var(--border); border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 1.3rem; color: var(--muted); transition: all 0.2s; flex-shrink: 0; background: var(--bg); }
+    .photo-add-more:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .photo-count-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* LIGHTBOX */
+    .lightbox-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+    .lightbox-overlay.open { display: flex; }
+    .lightbox-img { max-width: 90vw; max-height: 88vh; border-radius: 10px; object-fit: contain; box-shadow: 0 8px 40px rgba(0,0,0,0.6); animation: slideUp 0.2s ease; }
+    .lightbox-close { position: fixed; top: 1.2rem; right: 1.5rem; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 1.6rem; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--text); color: white; padding: 0.8rem 1.3rem; border-radius: var(--radius); font-size: 0.9rem; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--accent); }
+    .toast.error { background: var(--danger); }
+
+    /* SECTION TITLE */
+    .section-title { font-family: 'DM Serif Display', serif; font-size: 1.2rem; margin-bottom: 1rem; color: var(--text); }
+
+    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 700px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .view-grid { grid-template-columns: 1fr; }
+      .charts-grid { grid-template-columns: 1fr; }
+      th:nth-child(3), td:nth-child(3), th:nth-child(5), td:nth-child(5) { display: none; }
+    }
+    @media print {
+      header, .tabs, .toolbar, .stats, .action-btns, .header-btn { display: none !important; }
+      .table-wrap { box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Maruti Homoeo Clinic<span>Patient Management System</span></div>
+  <div class="header-right">
+    <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
+    <button class="header-btn" onclick="openAddModal()">+ Add Patient</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('patients', this)">👥 Patients</button>
+  <button class="tab-btn" onclick="switchTab('followups', this)">📅 Follow-ups</button>
+  <button class="tab-btn" onclick="switchTab('dashboard', this)">📊 Dashboard</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem;padding:0 0.5rem;font-size:0.75rem;color:var(--muted)">
+    <kbd style="background:var(--bg);padding:0.1rem 0.45rem;border-radius:4px;border:1px solid var(--border)">N</kbd> Add
+    <kbd style="background:var(--bg);padding:0.1rem 0.45rem;border-radius:4px;border:1px solid var(--border)">/</kbd> Search
+    <kbd style="background:var(--bg);padding:0.1rem 0.45rem;border-radius:4px;border:1px solid var(--border)">Esc</kbd> Close
+  </div>
+</div>
+
+<main>
+  <!-- PATIENTS TAB -->
+  <div id="tab-patients" class="tab-content active">
+    <div class="toolbar">
+      <div class="search-wrap" style="flex:2;min-width:180px">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name or phone…" oninput="handleSearch()"/>
+      </div>
+      <input type="date" class="filter-date" id="dateFilter" onchange="handleSearch(); limitYear(this)" onkeyup="limitYear(this)" title="Filter by appointment date" min="1900-01-01" max="2099-12-31" style="min-width:140px;flex:1"/>
+      <select class="filter-select" id="genderFilter" onchange="handleSearch()" style="min-width:110px;flex:1">
+        <option value="">All Genders</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+      <select class="filter-select" id="ageFilter" onchange="handleSearch()" style="min-width:110px;flex:1">
+        <option value="">All Ages</option>
+        <option value="0-17">0–17 Child</option>
+        <option value="18-35">18–35 Young</option>
+        <option value="36-60">36–60 Adult</option>
+        <option value="61-150">61+ Senior</option>
+      </select>
+      <button class="clear-btn" onclick="clearFilters()">Clear</button>
+      <button class="clear-btn" onclick="window.print()">🖨</button>
+      <button class="clear-btn" onclick="exportCSV()">⬇ CSV</button>
+      <button class="clear-btn" onclick="exportMonthlyReport()">📆 Monthly</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Total Patients</div><div class="stat-value" id="totalCount">0</div></div>
+      <div class="stat-card"><div class="stat-label">Showing</div><div class="stat-value" id="showingCount">0</div></div>
+      <div class="stat-card"><div class="stat-label">Today's Appointments</div><div class="stat-value" id="todayCount">0</div></div>
+      <div class="stat-card"><div class="stat-label">Upcoming Follow-ups</div><div class="stat-value" id="followupCount">0</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Patient Name</th>
+            <th>Age / Gender</th>
+            <th>Mobile</th>
+            <th class="sortable-th" onclick="cycleSort()" title="Sort by date"><span>Appt. Date</span> <span id="sortIcon">⇅</span></th>
+            <th>Follow-up</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+        </svg>
+        <p>No patients found.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLLOWUP TAB -->
+  <div id="tab-followups" class="tab-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <p class="section-title" style="margin:0">Follow-up Reminders</p>
+      <select id="followupRange" onchange="renderFollowups()" style="padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-family:inherit;font-size:0.9rem">
+        <option value="overdue">Overdue</option>
+        <option value="today">Today</option>
+        <option value="week" >This Week</option>
+        <option value="month">This Month</option>
+        <option value="all"selected>All Upcoming</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Patient Name</th><th>Mobile</th><th>Follow-up Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="followupBody"></tbody>
+      </table>
+      <div id="followupEmpty" class="empty-state" style="display:none"><p>No follow-ups in this range.</p></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" class="tab-content">
+    <p class="section-title">Overview</p>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Total Patients</div><div class="stat-value" id="d_total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Male</div><div class="stat-value" id="d_male">0</div></div>
+      <div class="stat-card"><div class="stat-label">Female</div><div class="stat-value" id="d_female">0</div></div>
+      <div class="stat-card"><div class="stat-label">Today's Appts</div><div class="stat-value" id="d_today">0</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Patients by Gender</div><div class="chart-container"><canvas id="chartGender"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Appointments per Month</div><div class="chart-container"><canvas id="chartMonth"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Patients by Age Group</div><div class="chart-container"><canvas id="chartAge"></canvas></div></div>
+    </div>
+  </div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="formTitle">Add New Patient</div>
+      <button class="close-btn" onclick="tryCloseForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Patient Name *</label>
+          <input type="text" id="f_name" placeholder="Full name" oninput="markDirty()"/>
+        </div>
+        <div class="form-group full">
+          <label>Address</label>
+          <input type="text" id="f_address" placeholder="Street, City" oninput="markDirty()"/>
+        </div>
+        <div class="form-group">
+          <label>Age *</label>
+          <input type="number" id="f_age" placeholder="Years" min="0" max="999" oninput="this.value=this.value.slice(0,3); markDirty()"/>
+        </div>
+        <div class="form-group">
+          <label>Gender *</label>
+          <select id="f_gender" onchange="markDirty()">
+            <option value="">Select…</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <div class="phone-wrap">
+            <select id="f_countryCode" onchange="markDirty()">
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+971">🇦🇪 +971</option>
+              <option value="+966">🇸🇦 +966</option>
+              <option value="+92">🇵🇰 +92</option>
+              <option value="+880">🇧🇩 +880</option>
+              <option value="+94">🇱🇰 +94</option>
+              <option value="+977">🇳🇵 +977</option>
+              <option value="+60">🇲🇾 +60</option>
+              <option value="+65">🇸🇬 +65</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+86">🇨🇳 +86</option>
+              <option value="+81">🇯🇵 +81</option>
+            </select>
+            <span class="phone-divider">—</span>
+            <input type="tel" id="f_mobile" placeholder="XXXXXXXXXX" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" onchange="markDirty()"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Appointment Date</label>
+          <div class="date-input-wrap">
+            <input type="date" id="f_appointmentDate" min="1900-01-01" max="2099-12-31" onchange="limitYear(this); markDirty()" onkeyup="limitYear(this)"/>
+            <button type="button" class="today-inline-btn" onclick="setFormToday()">Today</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Follow-up Date</label>
+          <div class="date-input-wrap">
+            <input type="date" id="f_followupDate" min="1900-01-01" max="2099-12-31" onchange="limitYear(this); markDirty()" onkeyup="limitYear(this)"/>
+            <button type="button" class="today-inline-btn" onclick="setFollowupToday()">Today</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Case Taking / Symptoms</label>
+          <textarea id="f_caseTaking" placeholder="Describe the patient's case, symptoms, history…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Repertorization</label>
+          <input type="text" id="f_notes" placeholder="Quick note visible in table…" oninput="markDirty()"/>
+        </div>
+        <div class="form-group full">
+          <label>Medicine Prescribed</label>
+          <textarea id="f_medicinePrescribed" placeholder="List medicines, dosage, duration…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Patient Photos <span class="photo-count-label" id="f_photoCount"></span></label>
+          <div class="photo-grid" id="f_photoGrid">
+            <div class="photo-add-more" onclick="document.getElementById('f_photoInput').click()" title="Add photos">
+              <span>📷</span><small style="font-size:0.65rem;margin-top:2px">Add</small>
+            </div>
+          </div>
+          <input type="file" id="f_photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this,'f')"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="tryCloseForm()">Cancel</button>
+      <button class="btn-primary" onclick="savePatient()">Save Patient</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title">Patient Details</div>
+      <button class="close-btn" onclick="closeViewModal()">✕</button>
+    </div>
+    <div class="modal-body" id="viewBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeViewModal()">Close</button>
+      <button class="btn-secondary" onclick="printPrescription()">📋 Prescription</button>
+      <button class="btn-primary" onclick="printPatient()">🖨 Print Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VISIT MODAL -->
+<div class="overlay" id="visitOverlay">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title">Add Visit</div>
+      <button class="close-btn" onclick="closeVisitModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Visit Date</label>
+          <div class="date-input-wrap">
+            <input type="date" id="v_date" min="1900-01-01" max="2099-12-31"/>
+            <button type="button" class="today-inline-btn" onclick="document.getElementById('v_date').value=new Date().toISOString().split('T')[0]">Today</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Case / Symptoms</label>
+          <textarea id="v_case" placeholder="Symptoms, observations…"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Additional Symptoms in next follow-up if present</label>
+          <textarea id="v_case" placeholder="Symptoms, observations…"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Medicine Prescribed</label>
+          <textarea id="v_medicine" placeholder="Medicines, dosage…"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Visit Photos <span class="photo-count-label" id="v_photoCount"></span></label>
+          <div class="photo-grid" id="v_photoGrid">
+            <div class="photo-add-more" onclick="document.getElementById('v_photoInput').click()" title="Add photos">
+              <span>📷</span><small style="font-size:0.65rem;margin-top:2px">Add</small>
+            </div>
+          </div>
+          <input type="file" id="v_photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this,'v')"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeVisitModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveVisit()">Save Visit</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="overlay" id="deleteOverlay">
+  <div class="modal delete-modal">
+    <div class="modal-header">
+      <div class="modal-title">Delete Patient</div>
+      <button class="close-btn" onclick="closeDeleteModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="delete-msg">Are you sure you want to delete <span class="delete-name" id="deleteName"></span>? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNSAVED WARNING MODAL -->
+<div class="overlay" id="unsavedOverlay">
+  <div class="modal unsaved-modal">
+    <div class="modal-header">
+      <div class="modal-title">Unsaved Changes</div>
+      <button class="close-btn" onclick="closeUnsaved()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="delete-msg">You have unsaved changes. Are you sure you want to close without saving?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeUnsaved()">Keep Editing</button>
+      <button class="btn-danger" onclick="forceCloseForm()">Discard Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="Patient photo"/>
+</div>
+
+<script>
+  const API = 'http://localhost:3000/api/patients';
+  const BASE = 'http://localhost:3000';
+  let allPatients = [];
+  let editingId = null;
+  let deletingId = null;
+  let viewingPatient = null;
+  let visitingPatientId = null;
+  let formDirty = false;
+  let charts = {};
+  let pendingPhotos = [];
+  let pendingVisitPhotos = [];
+
+  // ---- DARK MODE ----
+  function toggleDark() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('darkBtn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    if (!isDark) rebuildCharts();
+  }
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('darkBtn');
+      if (btn) btn.textContent = '☀️ Light';
+    });
+  }
+
+  // ---- LIGHTBOX ----
+  function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightboxOverlay').classList.add('open');
+  }
+  function closeLightbox() { document.getElementById('lightboxOverlay').classList.remove('open'); }
+
+  // ---- MULTI-PHOTO UPLOAD ----
+  const MAX_PHOTOS = 10;
+
+  function handlePhotoSelect(input, prefix) {
+    const files = Array.from(input.files);
+    if (!files.length) return;
+    const list = prefix === 'v' ? pendingVisitPhotos : pendingPhotos;
+    const grid = document.getElementById(prefix + '_photoGrid');
+    files.forEach(file => {
+      if (list.length >= MAX_PHOTOS) { showToast('Maximum ' + MAX_PHOTOS + ' photos allowed.', 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        list.push({ dataUrl: e.target.result, filename: file.name, saved: false });
+        renderPhotoGrid(prefix);
+        if (prefix === 'f') markDirty();
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  }
+
+  function renderPhotoGrid(prefix) {
+    const list = prefix === 'v' ? pendingVisitPhotos : pendingPhotos;
+    const grid = document.getElementById(prefix + '_photoGrid');
+    const countEl = document.getElementById(prefix + '_photoCount');
+    if (countEl) countEl.textContent = list.length ? '(' + list.length + ' photo' + (list.length>1?'s':'') + ')' : '';
+    let html = '';
+    list.forEach((item, i) => {
+      const src = item.saved ? (BASE + item.url) : item.dataUrl;
+      html += '<div class="photo-grid-item">'
+        + '<img src="' + src + '" alt="Photo ' + (i+1) + '" onclick="openLightbox(\'' + src.replace(/'/g,"\\'") + '\')" />'
+        + '<button class="photo-grid-remove" onclick="removeGridPhoto(\'' + prefix + '\',' + i + ')" title="Remove">✕</button>'
+        + '</div>';
+    });
+    if (list.length < MAX_PHOTOS) {
+      html += '<div class="photo-add-more" onclick="document.getElementById(\'' + prefix + '_photoInput\').click()" title="Add more photos">'
+        + '<span>📷</span><small style="font-size:0.65rem;margin-top:2px">Add</small></div>';
+    }
+    grid.innerHTML = html;
+  }
+
+  function removeGridPhoto(prefix, idx) {
+    const list = prefix === 'v' ? pendingVisitPhotos : pendingPhotos;
+    list.splice(idx, 1);
+    renderPhotoGrid(prefix);
+    if (prefix === 'f') markDirty();
+  }
+
+  function resetPhotoUI(prefix) {
+    if (prefix === 'v') { pendingVisitPhotos = []; }
+    else { pendingPhotos = []; }
+    document.getElementById(prefix + '_photoInput').value = '';
+    renderPhotoGrid(prefix);
+  }
+
+  async function uploadPendingPhotos(list) {
+    const urls = [];
+    for (const item of list) {
+      if (item.saved) { urls.push(item.url); continue; }
+      try {
+        const res = await fetch(BASE + '/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dataUrl: item.dataUrl, filename: item.filename || 'photo' })
+        });
+        const data = await res.json();
+        if (data.url) urls.push(data.url);
+      } catch(e) { showToast('A photo failed to upload.', 'error'); }
+    }
+    return urls;
+  }
+
+  // ---- TABS ----
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'dashboard') rebuildCharts();
+    if (name === 'followups') renderFollowups();
+  }
+
+  // ---- API CALLS ----
+  async function fetchPatients(search = '', date = '') {
+    let url = API;
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (date) params.append('date', date);
+    if (params.toString()) url += '?' + params;
+    const res = await fetch(url);
+    return res.json();
+  }
+  async function createPatient(data) {
+    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    return res.json();
+  }
+  async function updatePatient(id, data) {
+    const res = await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    return res.json();
+  }
+  async function deletePatient(id) {
+    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    return res.json();
+  }
+
+  // ---- LOAD & RENDER ----
+  async function load(search = '', date = '', sort = '') {
+    try {
+      const all = await fetchPatients();
+      allPatients = all;
+      let results = [...all];
+
+      if (search) {
+        const q = search.toLowerCase();
+        const qNum = q.replace(/[^0-9]/g,'');
+        results = results.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          (qNum.length >= 1 && (p.mobile || '').replace(/[^0-9]/g,'').includes(qNum))
+        );
+      }
+      if (date) results = results.filter(p => p.appointmentDate === date);
+
+      const gender = document.getElementById('genderFilter').value;
+      if (gender) results = results.filter(p => p.gender === gender);
+
+      const ageRange = document.getElementById('ageFilter').value;
+      if (ageRange) {
+        const [mn, mx] = ageRange.split('-').map(Number);
+        results = results.filter(p => p.age >= mn && p.age <= mx);
+      }
+
+      if (sort === 'asc') results.sort((a,b) => (a.appointmentDate||'').localeCompare(b.appointmentDate||''));
+      else if (sort === 'desc') results.sort((a,b) => (b.appointmentDate||'').localeCompare(a.appointmentDate||''));
+
+      renderTable(results);
+      updateStats(all, results);
+    } catch(e) {
+      showToast('Cannot connect to server. Is the backend running?', 'error');
+    }
+  }
+
+  function generatePatientId(createdAt, index) {
+    return 'P-' + String(index + 1).padStart(3, '0');
+  }
+
+  function renderTable(patients) {
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    if (!patients.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    const today = new Date().toISOString().split('T')[0];
+    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+    tbody.innerHTML = patients.map((p) => {
+      const idx = allSorted.findIndex(x => x.id === p.id);
+      const pid = generatePatientId(p.createdAt, idx);
+      let followupHtml = '—';
+      if (p.followupDate) {
+        const isOld = p.followupDate < today;
+        const isSoon = !isOld && p.followupDate <= new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+        const cls = isOld ? 'followup-past' : isSoon ? 'followup-soon' : '';
+        followupHtml = `<span class="followup-badge ${cls}">${formatDate(p.followupDate)}</span>`;
+      }
+      return `<tr>
+        <td><span class="patient-id">${pid}</span></td>
+        <td><strong style="display:block">${p.name}</strong><small style="color:var(--muted)">${p.address||'—'}</small></td>
+        <td>${p.age ? p.age+' yrs' : '—'} ${p.gender ? `<span class="gender-badge gender-${p.gender.toLowerCase()}">${p.gender}</span>` : ''}</td>
+        <td>${p.mobile||'—'}</td>
+        <td>${p.appointmentDate ? formatDate(p.appointmentDate) : '—'}</td>
+        <td>${followupHtml}</td>
+        <td><span style="font-size:0.82rem;color:var(--muted)">${p.notes||'—'}</span></td>
+        <td><div class="action-btns">
+          <button class="btn-icon" onclick="openViewModal('${p.id}')">👁 View</button>
+          <button class="btn-icon" onclick="openEditModal('${p.id}')">✏️ Edit</button>
+          <button class="btn-icon danger" onclick="openDeleteModal('${p.id}','${escapeHtml(p.name)}')">🗑</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function updateStats(all, filtered) {
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = all.filter(p => p.appointmentDate === today).length;
+    const followupCount = all.filter(p => p.followupDate && p.followupDate >= today).length;
+    document.getElementById('totalCount').textContent = all.length;
+    document.getElementById('showingCount').textContent = filtered.length;
+    document.getElementById('todayCount').textContent = todayCount;
+    document.getElementById('followupCount').textContent = followupCount;
+  }
+
+  // ---- DASHBOARD CHARTS ----
+  function rebuildCharts() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#8a8880' : '#7a7870';
+    const gridColor = isDark ? '#2a2d3a' : '#e2e0d8';
+
+    // Gender chart
+    const male = allPatients.filter(p => p.gender === 'Male').length;
+    const female = allPatients.filter(p => p.gender === 'Female').length;
+    const other = allPatients.filter(p => p.gender === 'Other').length;
+    if (charts.gender) charts.gender.destroy();
+    charts.gender = new Chart(document.getElementById('chartGender'), {
+      type: 'doughnut',
+      data: { labels: ['Male','Female','Other'], datasets: [{ data: [male,female,other], backgroundColor: ['#2563eb','#be185d','#7c3aed'], borderWidth: 0 }] },
+      options: { plugins: { legend: { labels: { color: textColor } } }, cutout: '65%' }
+    });
+
+    // Appointments per month
+    const monthCounts = {};
+    allPatients.forEach(p => {
+      if (p.appointmentDate) {
+        const mon = p.appointmentDate.slice(0,7);
+        monthCounts[mon] = (monthCounts[mon]||0)+1;
+      }
+    });
+    const months = Object.keys(monthCounts).sort().slice(-6);
+    if (charts.month) charts.month.destroy();
+    charts.month = new Chart(document.getElementById('chartMonth'), {
+      type: 'bar',
+      data: { labels: months.map(m => { const d=new Date(m+'-01'); return d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'}); }), datasets: [{ data: months.map(m=>monthCounts[m]), backgroundColor: '#2a6049', borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } } } }
+    });
+
+    // Age group chart
+    const ageGroups = { '0-17': 0, '18-35': 0, '36-60': 0, '61+': 0 };
+    allPatients.forEach(p => {
+      const a = p.age||0;
+      if (a<=17) ageGroups['0-17']++;
+      else if (a<=35) ageGroups['18-35']++;
+      else if (a<=60) ageGroups['36-60']++;
+      else ageGroups['61+']++;
+    });
+    if (charts.age) charts.age.destroy();
+    charts.age = new Chart(document.getElementById('chartAge'), {
+      type: 'bar',
+      data: { labels: Object.keys(ageGroups), datasets: [{ data: Object.values(ageGroups), backgroundColor: ['#34d399','#60a5fa','#f59e0b','#f87171'], borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: gridColor } } } }
+    });
+
+    // Dashboard stats
+    document.getElementById('d_total').textContent = allPatients.length;
+    document.getElementById('d_male').textContent = male;
+    document.getElementById('d_female').textContent = female;
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('d_today').textContent = allPatients.filter(p => p.appointmentDate === today).length;
+  }
+
+  // ---- SEARCH & FILTER ----
+  let searchTimer;
+  function handleSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      load(document.getElementById('searchInput').value.trim(), document.getElementById('dateFilter').value, currentSort);
+    }, 300);
+  }
+
+  const sortCycle = ['','asc','desc'];
+  const sortIcons = { '':'⇅', 'asc':'↑', 'desc':'↓' };
+  let sortCycleIdx = 0; let currentSort = '';
+  function cycleSort() {
+    sortCycleIdx = (sortCycleIdx+1)%sortCycle.length;
+    currentSort = sortCycle[sortCycleIdx];
+    document.getElementById('sortIcon').textContent = sortIcons[currentSort];
+    handleSearch();
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('dateFilter').value = '';
+    document.getElementById('genderFilter').value = '';
+    document.getElementById('ageFilter').value = '';
+    currentSort = ''; sortCycleIdx = 0;
+    document.getElementById('sortIcon').textContent = '⇅';
+    load();
+  }
+
+  // ---- FORM DIRTY ----
+  function markDirty() { formDirty = true; }
+  function tryCloseForm() {
+    if (formDirty) { document.getElementById('unsavedOverlay').classList.add('open'); }
+    else { closeFormModal(); }
+  }
+  function closeUnsaved() { document.getElementById('unsavedOverlay').classList.remove('open'); }
+  function forceCloseForm() { closeUnsaved(); closeFormModal(); }
+
+  // ---- ADD / EDIT FORM ----
+  function openAddModal() {
+    editingId = null; formDirty = false;
+    document.getElementById('formTitle').textContent = 'Add New Patient';
+    clearForm();
+    document.getElementById('formOverlay').classList.add('open');
+  }
+
+  function openEditModal(id) {
+    const p = allPatients.find(p => p.id === id);
+    if (!p) return;
+    editingId = id; formDirty = false;
+    document.getElementById('formTitle').textContent = 'Edit Patient';
+    document.getElementById('f_name').value = p.name||'';
+    document.getElementById('f_address').value = p.address||'';
+    document.getElementById('f_age').value = p.age||'';
+    document.getElementById('f_gender').value = p.gender||'';
+    if (p.mobile && (p.mobile.includes('-') || p.mobile.includes('\u2014'))) {
+      const parts = p.mobile.split(/[-\u2014]/);
+      document.getElementById('f_countryCode').value = parts[0];
+      document.getElementById('f_mobile').value = parts[1]||'';
+    } else {
+      document.getElementById('f_countryCode').value = '+91';
+      document.getElementById('f_mobile').value = p.mobile||'';
+    }
+    document.getElementById('f_notes').value = p.notes||'';
+    document.getElementById('f_appointmentDate').value = p.appointmentDate||'';
+    document.getElementById('f_followupDate').value = p.followupDate||'';
+    document.getElementById('f_caseTaking').value = p.caseTaking||'';
+    document.getElementById('f_medicinePrescribed').value = p.medicinePrescribed||'';
+    resetPhotoUI('f');
+    const existingPhotos = p.photos || (p.photo ? [p.photo] : []);
+    existingPhotos.forEach(url => pendingPhotos.push({ saved: true, url }));
+    renderPhotoGrid('f');
+    document.getElementById('formOverlay').classList.add('open');
+  }
+
+  function closeFormModal() {
+    document.getElementById('formOverlay').classList.remove('open');
+    editingId = null; formDirty = false;
+  }
+
+  function clearForm() {
+    ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate','f_notes','f_caseTaking','f_medicinePrescribed'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f_gender').value = '';
+    document.getElementById('f_countryCode').value = '+91';
+    resetPhotoUI('f');
+  }
+
+  async function savePatient() {
+    const name = document.getElementById('f_name').value.trim();
+    const age = document.getElementById('f_age').value.trim();
+    const gender = document.getElementById('f_gender').value;
+    if (!name) { showToast('Patient name is required.', 'error'); return; }
+    if (!editingId) {
+      const mob = document.getElementById('f_countryCode').value + '-' + document.getElementById('f_mobile').value.trim();
+      const dup = allPatients.find(p => p.name.toLowerCase()===name.toLowerCase() && cleanMobile(p.mobile)===cleanMobile(mob));
+      if (dup) { if (!confirm('A patient named "'+name+'" with the same phone already exists. Save anyway?')) return; }
+    }
+    if (!age) { showToast('Age is required.', 'error'); return; }
+    if (!gender) { showToast('Please select a gender.', 'error'); return; }
+
+    const photoUrls = await uploadPendingPhotos(pendingPhotos);
+
+    const data = {
+      name, age: parseInt(age), gender,
+      address: document.getElementById('f_address').value.trim(),
+      mobile: document.getElementById('f_countryCode').value + '-' + document.getElementById('f_mobile').value.trim(),
+      appointmentDate: document.getElementById('f_appointmentDate').value,
+      followupDate: document.getElementById('f_followupDate').value,
+      notes: document.getElementById('f_notes').value.trim(),
+      caseTaking: document.getElementById('f_caseTaking').value.trim(),
+      medicinePrescribed: document.getElementById('f_medicinePrescribed').value.trim(),
+      photos: photoUrls,
+    };
+    try {
+      if (editingId) { await updatePatient(editingId, data); showToast('Patient record updated!', 'success'); }
+      else { await createPatient(data); showToast('Patient added successfully!', 'success'); }
+      closeFormModal();
+      load(document.getElementById('searchInput').value, document.getElementById('dateFilter').value, currentSort);
+    } catch(e) { showToast('Error saving. Check server connection.', 'error'); }
+  }
+
+  // ---- VIEW MODAL ----
+  function openViewModal(id) {
+    const p = allPatients.find(p => p.id === id);
+    if (!p) return;
+    viewingPatient = p;
+    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
+    const idx = allSorted.findIndex(x => x.id === p.id);
+    const pid = generatePatientId(p.createdAt, idx);
+    const visits = p.visits || [];
+    document.getElementById('viewBody').innerHTML = `
+      <div class="view-grid">
+        <div class="view-field full" style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <label>Patient</label>
+            <p style="font-size:1.2rem;font-weight:600">${p.name} <span style="font-size:0.8rem;font-weight:400;color:var(--accent)">${pid}</span></p>
+          </div>
+          ${(()=>{ const pics = p.photos||(p.photo?[p.photo]:[]); return pics.length ? '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;flex-shrink:0">'+pics.map(url=>`<img src="${BASE+url}" alt="Photo" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${BASE+url}')"/>`).join('')+'</div>' : ''; })()}
+        </div>
+        <div class="view-field"><label>Age</label><p>${p.age ? p.age+' years' : '—'}</p></div>
+        <div class="view-field"><label>Gender</label><p>${p.gender||'—'}</p></div>
+        <div class="view-field full"><label>Address</label><p>${p.address||'—'}</p></div>
+        <div class="view-field"><label>Mobile</label><p>${p.mobile||'—'}</p></div>
+        <div class="view-field"><label>Appointment Date</label><p>${p.appointmentDate ? formatDate(p.appointmentDate) : '—'}</p></div>
+        <div class="view-field"><label>Follow-up Date</label><p>${p.followupDate ? formatDate(p.followupDate) : '—'}</p></div>
+        
+        <div class="view-field full"><label>Case Taking / Symptoms</label><p style="white-space:pre-wrap">${p.caseTaking||'—'}</p></div>
+      </div>
+       <hr class="divider"/>
+       <div class="view-grid">
+        <div class="view-field full"><label>Repertorization</label><p>${p.notes||'—'}</p></div>
+      </div>
+      <hr class="divider"/>
+      <div class="view-grid">
+        <div class="view-field full"><label>Medicine Prescribed</label><p style="white-space:pre-wrap">${p.medicinePrescribed||'—'}</p></div>
+      </div>
+      <hr class="divider"/>
+      <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.75rem">Visit History (${visits.length})</p>
+      ${visits.length ? visits.slice().reverse().map(v => {
+          const vPhotos = v.photos||[];
+          const photoHtml = vPhotos.length ? '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem">'+vPhotos.map(url=>`<img src="${BASE+url}" style="width:60px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${BASE+url}')"/>`).join('')+'</div>' : '';
+          return `<div class="visit-item">
+            <div class="visit-date">${formatDate(v.date)}</div>
+            <div class="visit-label">Case</div><div class="visit-text">${v.caseTaking||'—'}</div>
+            <div class="visit-label" style="margin-top:0.4rem">Medicine</div><div class="visit-text">${v.medicine||'—'}</div>
+            ${photoHtml}
+          </div>`;
+        }).join('') : '<p style="color:var(--muted);font-size:0.88rem;margin-bottom:0.75rem">No visits recorded yet.</p>'}
+      <button class="add-visit-btn" onclick="openVisitModal('${p.id}')">+ Next follow-up</button>
+      <hr class="divider"/>
+      <p style="font-size:0.78rem;color:var(--muted)">Record added: ${new Date(p.createdAt).toLocaleString()}${(()=>{const v=[...(p.visits||[])].sort((a,b)=>b.date.localeCompare(a.date));return v.length?" · Last visit: "+formatDate(v[0].date):"";})()}</p>
+    `;
+    document.getElementById('viewOverlay').classList.add('open');
+  }
+
+  function closeViewModal() { document.getElementById('viewOverlay').classList.remove('open'); }
+
+  // ---- VISIT ----
+  function openVisitModal(id) {
+    visitingPatientId = id;
+    document.getElementById('v_date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('v_case').value = '';
+    document.getElementById('v_medicine').value = '';
+    resetPhotoUI('v');
+    document.getElementById('visitOverlay').classList.add('open');
+  }
+  function closeVisitModal() {
+    document.getElementById('visitOverlay').classList.remove('open');
+    visitingPatientId = null;
+    resetPhotoUI('v');
+  }
+
+  async function saveVisit() {
+    const p = allPatients.find(x => x.id === visitingPatientId);
+    if (!p) return;
+    const visitPhotoUrls = await uploadPendingPhotos(pendingVisitPhotos);
+    const visit = {
+      date: document.getElementById('v_date').value,
+      caseTaking: document.getElementById('v_case').value.trim(),
+      medicine: document.getElementById('v_medicine').value.trim(),
+      photos: visitPhotoUrls,
+    };
+    const visits = [...(p.visits||[]), visit];
+    await updatePatient(p.id, { ...p, visits });
+    showToast('Visit saved!', 'success');
+    closeVisitModal();
+    await load(document.getElementById('searchInput').value, document.getElementById('dateFilter').value, currentSort);
+    openViewModal(p.id);
+  }
+
+  // ---- PRINT ----
+  function printPatient() {
+    const p = viewingPatient;
+    if (!p) return;
+    const win = window.open('', '_blank');
+    win.document.write(`<html><head><title>Patient – ${p.name}</title><style>
+      body{font-family:Georgia,serif;padding:2rem;color:#111;max-width:700px;margin:0 auto}
+      h1{font-size:1.5rem;margin-bottom:0.3rem} .sub{color:#666;margin-bottom:1.5rem;font-size:0.9rem}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+      .field label{font-size:0.72rem;text-transform:uppercase;color:#666;display:block}
+      .field p{margin:0.2rem 0 0;font-size:0.95rem} hr{border:none;border-top:1px solid #ddd;margin:1rem 0}
+      pre{font-family:inherit;white-space:pre-wrap} .visit{background:#f9f9f9;padding:0.75rem;margin-bottom:0.5rem;border-radius:6px}
+    </style></head><body>
+      <h1>${p.name}</h1><p class="sub">Appointment: ${p.appointmentDate ? formatDate(p.appointmentDate) : '—'} | Follow-up: ${p.followupDate ? formatDate(p.followupDate) : '—'}</p>
+      <div class="grid">
+        <div class="field"><label>Age</label><p>${p.age||'—'} years</p></div>
+        <div class="field"><label>Gender</label><p>${p.gender||'—'}</p></div>
+        <div class="field"><label>Mobile</label><p>${p.mobile||'—'}</p></div>
+        <div class="field"><label>Address</label><p>${p.address||'—'}</p></div>
+      </div>
+      <hr/><div class="field" style="margin-bottom:1rem"><label>Case Taking</label><pre>${p.caseTaking||'—'}</pre></div>
+      <hr/><div class="field" style="margin-bottom:1rem"><label>Medicine Prescribed</label><pre>${p.medicinePrescribed||'—'}</pre></div>
+      ${(p.visits||[]).length ? '<hr/><h3>Visit History</h3>' + p.visits.slice().reverse().map(v => `<div class="visit"><strong>${formatDate(v.date)}</strong><br/><label>Case:</label> ${v.caseTaking||'—'}<br/><label>Medicine:</label> ${v.medicine||'—'}</div>`).join('') : ''}
+    </body></html>`);
+    win.document.close(); win.print();
+  }
+
+  function printPrescription() {
+    const p = viewingPatient;
+    if (!p) return;
+    const win = window.open('', '_blank');
+    win.document.write(`<html><head><title>Prescription – ${p.name}</title><style>
+      body{font-family:Georgia,serif;padding:2rem;color:#111;max-width:600px;margin:0 auto}
+      .clinic-header{text-align:center;border-bottom:2px solid #2a6049;padding-bottom:1rem;margin-bottom:1.5rem}
+      .clinic-name{font-size:1.6rem;color:#2a6049;font-weight:bold} .clinic-sub{color:#666;font-size:0.85rem}
+      .rx{font-size:2rem;color:#2a6049;font-weight:bold;margin:1rem 0 0.5rem} .patient-info{background:#f5f5f0;padding:1rem;border-radius:6px;margin-bottom:1.5rem}
+      .grid{display:flex;gap:2rem} .field label{font-size:0.72rem;text-transform:uppercase;color:#666;display:block}
+      .field p{margin:0.1rem 0 0} hr{border:none;border-top:1px solid #ddd;margin:1rem 0}
+      pre{font-family:inherit;white-space:pre-wrap;font-size:0.95rem;line-height:1.7}
+      .footer{margin-top:3rem;text-align:right;border-top:1px solid #ccc;padding-top:1rem;color:#666;font-size:0.85rem}
+    </style></head><body>
+      <div class="clinic-header"><div class="clinic-name">Maruti Homoeo Clinic</div><div class="clinic-sub">Patient Prescription</div></div>
+      <div class="patient-info">
+        <div class="grid">
+          <div class="field"><label>Patient Name</label><p><strong>${p.name}</strong></p></div>
+          <div class="field"><label>Age / Gender</label><p>${p.age||'—'} yrs / ${p.gender||'—'}</p></div>
+          <div class="field"><label>Date</label><p>${p.appointmentDate ? formatDate(p.appointmentDate) : new Date().toLocaleDateString('en-IN')}</p></div>
+        </div>
+      </div>
+      <div class="rx">Rx</div>
+      <pre>${p.medicinePrescribed||'No medicines prescribed'}</pre>
+      <hr/>
+      <div class="field"><label>Diagnosis / Case Notes</label><pre>${p.caseTaking||'—'}</pre></div>
+      ${p.followupDate ? `<div class="field" style="margin-top:1rem"><label>Follow-up Date</label><p><strong>${formatDate(p.followupDate)}</strong></p></div>` : ''}
+      <div class="footer">Doctor's Signature _______________</div>
+    </body></html>`);
+    win.document.close(); win.print();
+  }
+
+  // ---- DELETE ----
+  function openDeleteModal(id, name) { deletingId = id; document.getElementById('deleteName').textContent = name; document.getElementById('deleteOverlay').classList.add('open'); }
+  function closeDeleteModal() { document.getElementById('deleteOverlay').classList.remove('open'); deletingId = null; }
+  async function confirmDelete() {
+    if (!deletingId) return;
+    try { await deletePatient(deletingId); showToast('Patient deleted.', 'success'); closeDeleteModal(); closeViewModal(); load(); }
+    catch(e) { showToast('Error deleting.', 'error'); }
+  }
+
+  // ---- EXPORT CSV ----
+  function exportCSV() {
+    const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
+    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
+    const rows = allSorted.map((p,i) => [generatePatientId(p.createdAt,i), p.name, p.address, p.age, p.gender, p.mobile, p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'\"\'\"')}"` ));
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    a.download = 'patients_'+new Date().toISOString().split('T')[0]+'.csv';
+    a.click();
+    showToast('CSV exported!', 'success');
+  }
+
+  // ---- AUTO BACKUP ----
+  function autoBackup() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastBackup = localStorage.getItem('lastBackup');
+    if (lastBackup === today || !allPatients.length) return;
+    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
+    const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
+    const rows = allSorted.map((p,i) => [generatePatientId(p.createdAt,i), p.name, p.address, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`));
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    a.download = 'backup_'+today+'.csv';
+    a.click();
+    localStorage.setItem('lastBackup', today);
+    showToast('Daily backup saved!', 'success');
+  }
+
+  // ---- HELPERS ----
+  function cleanMobile(m) {
+    if (!m) return '';
+    // Replace em dash and any unicode dash variants with plain hyphen
+    return m.replace(/[—–‒]/g, '-');
+  }
+
+  function formatDate(d) { return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+  function escapeHtml(s) { return s.replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+  function showToast(msg, type='') { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type; setTimeout(()=>t.className='toast',3000); }
+  function limitYear(input) { if(!input.value) return; const p=input.value.split('-'); if(p[0]&&p[0].length>4){p[0]=p[0].slice(0,4);input.value=p.join('-');} }
+  function setFormToday() { document.getElementById('f_appointmentDate').value=new Date().toISOString().split('T')[0]; markDirty(); }
+  function setFollowupToday() { document.getElementById('f_followupDate').value=new Date().toISOString().split('T')[0]; markDirty(); }
+
+  document.getElementById('formOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) tryCloseForm(); });
+  document.getElementById('viewOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeViewModal(); });
+  document.getElementById('deleteOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeDeleteModal(); });
+  document.getElementById('visitOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeVisitModal(); });
+
+
+  // ---- MONTHLY REPORT ----
+  function exportMonthlyReport() {
+    const month = prompt('Enter month (YYYY-MM):', new Date().toISOString().slice(0,7));
+    if (!month || !/^\d{4}-\d{2}$/.test(month)) { showToast('Invalid format. Use YYYY-MM', 'error'); return; }
+    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    const filtered = allSorted.filter(p => (p.appointmentDate||'').startsWith(month));
+    if (!filtered.length) { showToast('No patients for '+month, 'error'); return; }
+    const headers = ['Patient ID','Name','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine'];
+    const rows = filtered.map(p => [generatePatientId(p.createdAt, allSorted.indexOf(p)), p.name, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
+    const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download = 'report_'+month+'.csv';
+    a.click();
+    showToast('Monthly report: '+filtered.length+' patients exported!','success');
+  }
+
+  // ---- FOLLOW-UP TAB RENDER ----
+  function renderFollowups() {
+    const range = document.getElementById('followupRange').value;
+    const today = new Date().toISOString().split('T')[0];
+    const weekEnd = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+    const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).toISOString().split('T')[0];
+    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    let list = allPatients.filter(p => p.followupDate).filter(p => {
+      if (range==='overdue') return p.followupDate < today;
+      if (range==='today') return p.followupDate === today;
+      if (range==='week') return p.followupDate >= today && p.followupDate <= weekEnd;
+      if (range==='month') return p.followupDate >= today && p.followupDate <= monthEnd;
+      return p.followupDate >= today;
+    }).sort((a,b)=>a.followupDate.localeCompare(b.followupDate));
+    const tbody = document.getElementById('followupBody');
+    const empty = document.getElementById('followupEmpty');
+    if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    tbody.innerHTML = list.map(p => {
+      const idx = allSorted.findIndex(x=>x.id===p.id);
+      const pid = generatePatientId(p.createdAt, idx);
+      const diff = Math.round((new Date(p.followupDate+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+      const diffStr = diff===0 ? '<span style="color:#b45309;font-weight:600">Today</span>'
+        : diff<0 ? '<span style="color:#c0392b;font-weight:600">'+Math.abs(diff)+' days overdue</span>'
+        : '<span style="color:var(--accent)">in '+diff+' days</span>';
+      return '<tr><td><span class="patient-id">'+pid+'</span></td><td><strong>'+p.name+'</strong></td><td>'+cleanMobile(p.mobile||'')+'</td><td>'+formatDate(p.followupDate)+'</td><td>'+diffStr+'</td><td><button class="btn-icon" onclick="openViewModal(\''+p.id+'\')">👁 View</button></td></tr>';
+    }).join('');
+  }
+
+  // ---- KEYBOARD SHORTCUTS ----
+  document.addEventListener('keydown', e => {
+    if (e.key==='Escape') {
+      if (document.getElementById('lightboxOverlay').classList.contains('open')) { closeLightbox(); return; }
+    }
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if (e.key==='n'||e.key==='N') { e.preventDefault(); openAddModal(); }
+    if (e.key==='/') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+    if (e.key==='Escape') {
+      if (document.getElementById('unsavedOverlay').classList.contains('open')) { closeUnsaved(); return; }
+      if (document.getElementById('visitOverlay').classList.contains('open')) { closeVisitModal(); return; }
+      if (document.getElementById('deleteOverlay').classList.contains('open')) { closeDeleteModal(); return; }
+      if (document.getElementById('viewOverlay').classList.contains('open')) { closeViewModal(); return; }
+      if (document.getElementById('formOverlay').classList.contains('open')) { tryCloseForm(); return; }
+    }
+  });
+
+  // ---- PAGINATION ----
+  let currentPage = 1;
+  const PAGE_SIZE = 20;
+  let paginatedData = [];
+
+  const _origRender = renderTable;
+  function renderTable(patients) {
+    paginatedData = patients;
+    currentPage = 1;
+    renderPage();
+  }
+
+  function renderPage() {
+    const tbody = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    const total = paginatedData.length;
+    const start = (currentPage-1)*PAGE_SIZE;
+    const page = paginatedData.slice(start, start+PAGE_SIZE);
+    if (!total) { tbody.innerHTML=''; empty.style.display='block'; renderPagination(0); return; }
+    empty.style.display='none';
+    const today = new Date().toISOString().split('T')[0];
+    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    tbody.innerHTML = page.map(p => {
+      const idx = allSorted.findIndex(x=>x.id===p.id);
+      const pid = generatePatientId(p.createdAt, idx);
+      let fHtml='—';
+      if(p.followupDate){const isOld=p.followupDate<today;const isSoon=!isOld&&p.followupDate<=new Date(Date.now()+7*86400000).toISOString().split('T')[0];const cls=isOld?'followup-past':isSoon?'followup-soon':'';fHtml='<span class="followup-badge '+cls+'">'+formatDate(p.followupDate)+'</span>';}
+      const gBadge = p.gender ? '<span class="gender-badge gender-'+p.gender.toLowerCase()+'">'+p.gender+'</span>' : '';
+      return '<tr>'
+        +'<td><span class="patient-id">'+pid+'</span></td>'
+        +'<td><strong style="display:block">'+p.name+'</strong><small style="color:var(--muted)">'+(p.address||'—')+'</small></td>'
+        +'<td>'+(p.age?p.age+' yrs':'—')+' '+gBadge+'</td>'
+        +'<td>'+cleanMobile(p.mobile||'—')+'</td>'
+        +'<td>'+(p.appointmentDate?formatDate(p.appointmentDate):'—')+'</td>'
+        +'<td>'+fHtml+'</td>'
+        +'<td><span style="font-size:0.82rem;color:var(--muted)">'+(p.notes||'—')+'</span></td>'
+        +'<td><div class="action-btns">'
+        +'<button class="btn-icon" onclick="openViewModal(\''+p.id+'\')">👁 View</button>'
+        +' <button class="btn-icon" onclick="openEditModal(\''+p.id+'\')">✏️ Edit</button>'
+        +' <button class="btn-icon danger" onclick="openDeleteModal(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')">\🗑</button>'
+        +'</div></td></tr>';
+    }).join('');
+    renderPagination(total);
+  }
+
+  function renderPagination(total) {
+    let el = document.getElementById('paginationBar');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'paginationBar';
+      el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-top:1px solid var(--border);font-size:0.85rem;color:var(--muted);flex-wrap:wrap;gap:0.5rem';
+      document.querySelector('.table-wrap').appendChild(el);
+    }
+    if (total<=PAGE_SIZE) { el.style.display='none'; return; }
+    el.style.display='flex';
+    const totalPages=Math.ceil(total/PAGE_SIZE);
+    const start=(currentPage-1)*PAGE_SIZE+1;
+    const end=Math.min(currentPage*PAGE_SIZE,total);
+    const btnStyle='padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;font-family:inherit';
+    el.innerHTML='<span>Showing '+start+'\u2013'+end+' of '+total+'</span>'
+      +'<div style="display:flex;gap:0.4rem">'
+      +'<button onclick="goPage(1)" style="'+btnStyle+'" '+(currentPage===1?'disabled':'')+'>&#171;</button>'
+      +'<button onclick="goPage('+(currentPage-1)+')" style="'+btnStyle+'" '+(currentPage===1?'disabled':'')+'>&#8249;</button>'
+      +'<span style="padding:0.3rem 0.8rem;background:var(--accent);color:white;border-radius:6px;font-weight:600">'+currentPage+'/'+totalPages+'</span>'
+      +'<button onclick="goPage('+(currentPage+1)+')" style="'+btnStyle+'" '+(currentPage===totalPages?'disabled':'')+'>&#8250;</button>'
+      +'<button onclick="goPage('+totalPages+')" style="'+btnStyle+'" '+(currentPage===totalPages?'disabled':'')+'>&#187;</button>'
+      +'</div>';
+  }
+
+  function goPage(n) {
+    const tp=Math.ceil(paginatedData.length/PAGE_SIZE);
+    currentPage=Math.max(1,Math.min(n,tp));
+    renderPage();
+    document.querySelector('.table-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+
+  // Init
+  load().then(() => setTimeout(autoBackup, 2000));
+</script>
+</body>
+</html>
