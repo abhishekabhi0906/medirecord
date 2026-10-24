@@ -215,7 +215,7 @@
 <body>
 
 <header>
-  <div class="logo">Maruti Homoeo Clinic<span>Patient Management System</span></div>
+  <div class="logo">Ashwani Homeo Clinic<span>Patient Management Book</span></div>
   <div class="header-right">
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
     <button class="header-btn" onclick="openAddModal()">+ Add Patient</button>
@@ -402,14 +402,6 @@
             <input type="date" id="f_followupDate" min="1900-01-01" max="2099-12-31" onchange="limitYear(this); markDirty()" onkeyup="limitYear(this)"/>
             <button type="button" class="today-inline-btn" onclick="setFollowupToday()">Today</button>
           </div>
-        </div>
-        <div class="form-group full">
-          <label>Case Taking / Symptoms</label>
-          <textarea id="f_caseTaking" placeholder="Describe the patient's case, symptoms, history…" oninput="markDirty()"></textarea>
-        </div>
-        <div class="form-group full">
-          <label>Repertorization</label>
-          <input type="text" id="f_notes" placeholder="Quick note visible in table…" oninput="markDirty()"/>
         </div>
         <!-- CASE HISTORY SECTIONS -->
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">1. Present Complaint</h3></div>
@@ -1173,12 +1165,6 @@
         <div class="view-field"><label>Appointment Date</label><p>${p.appointmentDate ? formatDate(p.appointmentDate) : '—'}</p></div>
         <div class="view-field"><label>Follow-up Date</label><p>${p.followupDate ? formatDate(p.followupDate) : '—'}</p></div>
         
-        <div class="view-field full"><label>Case Taking / Symptoms</label><p style="white-space:pre-wrap">${p.caseTaking||'—'}</p></div>
-      </div>
-       <hr class="divider"/>
-       <div class="view-grid">
-        <div class="view-field full"><label>Repertorization</label><p>${p.notes||'—'}</p></div>
-      </div>
       <hr class="divider"/>
       <div class="view-grid">
         <div class="view-field full"><label>Medicine Prescribed</label><p style="white-space:pre-wrap">${p.medicinePrescribed||'—'}</p></div>
