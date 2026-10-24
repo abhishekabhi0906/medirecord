@@ -1041,10 +1041,8 @@
       document.getElementById('f_countryCode').value = '+91';
       document.getElementById('f_mobile').value = p.mobile||'';
     }
-    document.getElementById('f_notes').value = p.notes||'';
     document.getElementById('f_appointmentDate').value = p.appointmentDate||'';
     document.getElementById('f_followupDate').value = p.followupDate||'';
-    document.getElementById('f_caseTaking').value = p.caseTaking||'';
     document.getElementById('f_medicinePrescribed').value = p.medicinePrescribed||'';
 
     // Load case history from JSONB
@@ -1092,11 +1090,11 @@
   }
 
   function clearForm() {
-    ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate','f_notes',
+    ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate',
      'f_presentComplaint','f_historyOfPresentComplaint','f_pastHistory','f_familyHistory','f_gynecMenarche','f_gynecMenstruation','f_gynecObstetrical',
      'f_physicalAppetite','f_physicalDesire','f_physicalAversion','f_physicalThirst','f_physicalUrine','f_physicalRespiration','f_physicalSleep','f_physicalDreams',
      'f_examPigmentation','f_examEmaciation','f_examBP','f_examPulse','f_sysGI','f_sysRespiratory','f_sysCardiovascular','f_sysCNS','f_sysSkeletal',
-     'f_investigations','f_differentialDiagnosis','f_provisionalDiagnosis','f_rubrics','f_followupPlan'
+     'f_investigations','f_differentialDiagnosis','f_provisionalDiagnosis','f_rubrics','f_medicinePrescribed','f_followupPlan'
     ].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f_gender').value = '';
     document.getElementById('f_countryCode').value = '+91';
