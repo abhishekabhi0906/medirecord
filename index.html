@@ -730,7 +730,8 @@
     if (countEl) countEl.textContent = list.length ? '(' + list.length + ' photo' + (list.length>1?'s':'') + ')' : '';
     let html = '';
     list.forEach((item, i) => {
-      const src = item.saved ? (BASE + item.url) : item.dataUrl;
+      // For saved photos (from DB), use URL directly; for new photos, use dataUrl
+      const src = item.saved ? item.url : item.dataUrl;
       html += '<div class="photo-grid-item">'
         + '<img src="' + src + '" alt="Photo ' + (i+1) + '" onclick="openLightbox(\'' + src.replace(/'/g,"\\'") + '\')" />'
         + '<button class="photo-grid-remove" onclick="removeGridPhoto(\'' + prefix + '\',' + i + ')" title="Remove">✕</button>'
@@ -803,6 +804,32 @@
     return res.json();
   }
   async function deletePatient(id) {
+    try {
+      // First, get patient data to get photo URLs
+      const patient = allPatients.find(p => p.id === id);
+      if (patient && patient.photos && patient.photos.length > 0) {
+        // Delete each photo from Supabase Storage
+        for (const photoUrl of patient.photos) {
+          try {
+            // Extract filename from URL
+            const urlParts = photoUrl.split('/');
+            const filename = urlParts[urlParts.length - 1];
+            // Delete from storage
+            await fetch(`${BASE}/api/delete-photo`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename })
+            });
+          } catch(e) {
+            console.warn('Failed to delete photo:', e);
+          }
+        }
+      }
+    } catch(e) {
+      console.warn('Error deleting photos:', e);
+    }
+
+    // Now delete the patient record
     const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
     return res.json();
   }
@@ -844,7 +871,10 @@
   }
 
   function generatePatientId(createdAt, index) {
-    return 'P-' + String(index + 1).padStart(3, '0');
+    // Use createdAt timestamp to generate unique ID that won't change
+    const timestamp = new Date(createdAt).getTime();
+    const lastFourDigits = String(timestamp).slice(-4);
+    return 'P-' + lastFourDigits;
   }
 
   function renderTable(patients) {
@@ -1136,7 +1166,9 @@
       if (editingId) { await updatePatient(editingId, data); showToast('Patient record updated!', 'success'); }
       else { await createPatient(data); showToast('Patient added successfully!', 'success'); }
       closeFormModal();
-      load(document.getElementById('searchInput').value, document.getElementById('dateFilter').value, currentSort);
+      // Clear search input after saving to show all patients
+      document.getElementById('searchInput').value = '';
+      load('', document.getElementById('dateFilter').value, currentSort);
     } catch(e) { showToast('Error saving. Check server connection.', 'error'); }
   }
 
@@ -1173,7 +1205,7 @@
       <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.75rem">Visit History (${visits.length})</p>
       ${visits.length ? visits.slice().reverse().map(v => {
           const vPhotos = v.photos||[];
-          const photoHtml = vPhotos.length ? '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem">'+vPhotos.map(url=>`<img src="${BASE+url}" style="width:60px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${BASE+url}')"/>`).join('')+'</div>' : '';
+          const photoHtml = vPhotos.length ? '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem">'+vPhotos.map(url=>`<img src="${url}" style="width:60px;height:60px;border-radius:6px;object-fit:cover;border:1px solid var(--border);cursor:zoom-in;" onclick="openLightbox('${url}')"/>`).join('')+'</div>' : '';
           return `<div class="visit-item">
             <div class="visit-date">${formatDate(v.date)}</div>
             <div class="visit-label">Case</div><div class="visit-text">${v.caseTaking||'—'}</div>

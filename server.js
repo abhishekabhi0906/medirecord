@@ -92,6 +92,18 @@ app.put('/api/patients/:id', async (req, res) => {
   }
 });
 
+//delete photos of a patient from supabase storage
+app.post('/api/delete-photo', async (req, res) => {
+  try {
+    const { filename } = req.body;
+    const { error } = await supabase.storage.from('patient-photos').remove([filename]);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // DELETE patient
 app.delete('/api/patients/:id', async (req, res) => {
   try {
