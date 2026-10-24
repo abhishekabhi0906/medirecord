@@ -411,10 +411,146 @@
           <label>Repertorization</label>
           <input type="text" id="f_notes" placeholder="Quick note visible in table…" oninput="markDirty()"/>
         </div>
+        <!-- CASE HISTORY SECTIONS -->
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">1. Present Complaint</h3></div>
+        <div class="form-group full">
+          <textarea id="f_presentComplaint" placeholder="Describe the patient's main complaint…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">2. History of Present Complaint</h3></div>
+        <div class="form-group full">
+          <textarea id="f_historyOfPresentComplaint" placeholder="Detailed history of the present complaint…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">3. Past History</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">Major Illness, Surgery, Accident/Trauma, Vaccination History</small></div>
+        <div class="form-group full">
+          <textarea id="f_pastHistory" placeholder="List any major illnesses, surgeries, accidents, vaccinations…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">4. Family History</h3></div>
+        <div class="form-group full">
+          <textarea id="f_familyHistory" placeholder="Describe family history of diseases, conditions…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">5. Gynecological History</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">5a) Menarche / Menopause</small></div>
+        <div class="form-group full">
+          <textarea id="f_gynecMenarche" placeholder="Age of menarche, menopause details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">5b) Menstruation (Duration, Quantity, Cycle, Colour, Clot, Odour, Before/During/After Menses)</small></div>
+        <div class="form-group full">
+          <textarea id="f_gynecMenstruation" placeholder="Menstruation details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">5c) Obstetrical History (Gravida, Parity, Abortion)</small></div>
+        <div class="form-group full">
+          <textarea id="f_gynecObstetrical" placeholder="Obstetrical history…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">6. Physical General</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">6a) Appetite</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalAppetite" placeholder="Appetite details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6b) Desire</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalDesire" placeholder="Desires…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6c) Aversion</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalAversion" placeholder="Aversions…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6d) Thirst</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalThirst" placeholder="Thirst details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6e) Urine</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalUrine" placeholder="Urine details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6f) Respiration</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalRespiration" placeholder="Respiration details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6g) Sleep</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalSleep" placeholder="Sleep details…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">6h) Dreams</small></div>
+        <div class="form-group full">
+          <textarea id="f_physicalDreams" placeholder="Dreams details…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">7. Physical Examination</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">7a) Pigmentation</small></div>
+        <div class="form-group full">
+          <textarea id="f_examPigmentation" placeholder="Pigmentation observations…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">7b) Emaciation</small></div>
+        <div class="form-group full">
+          <textarea id="f_examEmaciation" placeholder="Emaciation observations…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">7c) BP (Blood Pressure)</small></div>
+        <div class="form-group full">
+          <input type="text" id="f_examBP" placeholder="e.g., 120/80 mmHg" oninput="markDirty()"/>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">7d) Pulse</small></div>
+        <div class="form-group full">
+          <input type="text" id="f_examPulse" placeholder="e.g., 72 bpm" oninput="markDirty()"/>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">8. Systemic Examination</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">8a) Gastrointestinal System</small></div>
+        <div class="form-group full">
+          <textarea id="f_sysGI" placeholder="GI system examination…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">8b) Respiratory System</small></div>
+        <div class="form-group full">
+          <textarea id="f_sysRespiratory" placeholder="Respiratory system examination…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">8c) Cardiovascular System</small></div>
+        <div class="form-group full">
+          <textarea id="f_sysCardiovascular" placeholder="Cardiovascular system examination…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">8d) CNS (Central Nervous System)</small></div>
+        <div class="form-group full">
+          <textarea id="f_sysCNS" placeholder="CNS examination…" oninput="markDirty()"></textarea>
+        </div>
+        <div class="form-group full"><small style="color:var(--muted)">8e) Skeletal System</small></div>
+        <div class="form-group full">
+          <textarea id="f_sysSkeletal" placeholder="Skeletal system examination…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">9. Laboratory Investigations</h3></div>
+        <div class="form-group full">
+          <textarea id="f_investigations" placeholder="List investigations, results…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">10. Differential Diagnosis</h3></div>
+        <div class="form-group full">
+          <textarea id="f_differentialDiagnosis" placeholder="List differential diagnoses…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">11. Provisional Diagnosis</h3></div>
+        <div class="form-group full">
+          <textarea id="f_provisionalDiagnosis" placeholder="Provisional diagnosis…" oninput="markDirty()"></textarea>
+        </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">12. Rubrics</h3></div>
+        <div class="form-group full">
+          <textarea id="f_rubrics" placeholder="Rubrics from repertory…" oninput="markDirty()"></textarea>
+        </div>
+
         <div class="form-group full">
           <label>Medicine Prescribed</label>
           <textarea id="f_medicinePrescribed" placeholder="List medicines, dosage, duration…" oninput="markDirty()"></textarea>
         </div>
+
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">14. Follow-up Plan</h3></div>
+        <div class="form-group full">
+          <textarea id="f_followupPlan" placeholder="Follow-up plan and advice…" oninput="markDirty()"></textarea>
+        </div>
+
         <div class="form-group full">
           <label>Patient Photos <span class="photo-count-label" id="f_photoCount"></span></label>
           <div class="photo-grid" id="f_photoGrid">
@@ -888,6 +1024,39 @@
     document.getElementById('f_followupDate').value = p.followupDate||'';
     document.getElementById('f_caseTaking').value = p.caseTaking||'';
     document.getElementById('f_medicinePrescribed').value = p.medicinePrescribed||'';
+
+    // Load case history from JSONB
+    const ch = p.caseHistory || {};
+    document.getElementById('f_presentComplaint').value = ch.presentComplaint||'';
+    document.getElementById('f_historyOfPresentComplaint').value = ch.historyOfPresentComplaint||'';
+    document.getElementById('f_pastHistory').value = ch.pastHistory||'';
+    document.getElementById('f_familyHistory').value = ch.familyHistory||'';
+    document.getElementById('f_gynecMenarche').value = ch.gynecMenarche||'';
+    document.getElementById('f_gynecMenstruation').value = ch.gynecMenstruation||'';
+    document.getElementById('f_gynecObstetrical').value = ch.gynecObstetrical||'';
+    document.getElementById('f_physicalAppetite').value = ch.physicalAppetite||'';
+    document.getElementById('f_physicalDesire').value = ch.physicalDesire||'';
+    document.getElementById('f_physicalAversion').value = ch.physicalAversion||'';
+    document.getElementById('f_physicalThirst').value = ch.physicalThirst||'';
+    document.getElementById('f_physicalUrine').value = ch.physicalUrine||'';
+    document.getElementById('f_physicalRespiration').value = ch.physicalRespiration||'';
+    document.getElementById('f_physicalSleep').value = ch.physicalSleep||'';
+    document.getElementById('f_physicalDreams').value = ch.physicalDreams||'';
+    document.getElementById('f_examPigmentation').value = ch.examPigmentation||'';
+    document.getElementById('f_examEmaciation').value = ch.examEmaciation||'';
+    document.getElementById('f_examBP').value = ch.examBP||'';
+    document.getElementById('f_examPulse').value = ch.examPulse||'';
+    document.getElementById('f_sysGI').value = ch.sysGI||'';
+    document.getElementById('f_sysRespiratory').value = ch.sysRespiratory||'';
+    document.getElementById('f_sysCardiovascular').value = ch.sysCardiovascular||'';
+    document.getElementById('f_sysCNS').value = ch.sysCNS||'';
+    document.getElementById('f_sysSkeletal').value = ch.sysSkeletal||'';
+    document.getElementById('f_investigations').value = ch.investigations||'';
+    document.getElementById('f_differentialDiagnosis').value = ch.differentialDiagnosis||'';
+    document.getElementById('f_provisionalDiagnosis').value = ch.provisionalDiagnosis||'';
+    document.getElementById('f_rubrics').value = ch.rubrics||'';
+    document.getElementById('f_followupPlan').value = ch.followupPlan||'';
+
     resetPhotoUI('f');
     const existingPhotos = p.photos || (p.photo ? [p.photo] : []);
     existingPhotos.forEach(url => pendingPhotos.push({ saved: true, url }));
@@ -901,7 +1070,12 @@
   }
 
   function clearForm() {
-    ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate','f_notes','f_caseTaking','f_medicinePrescribed'].forEach(id => document.getElementById(id).value = '');
+    ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate','f_notes','f_caseTaking','f_medicinePrescribed',
+     'f_presentComplaint','f_historyOfPresentComplaint','f_pastHistory','f_familyHistory','f_gynecMenarche','f_gynecMenstruation','f_gynecObstetrical',
+     'f_physicalAppetite','f_physicalDesire','f_physicalAversion','f_physicalThirst','f_physicalUrine','f_physicalRespiration','f_physicalSleep','f_physicalDreams',
+     'f_examPigmentation','f_examEmaciation','f_examBP','f_examPulse','f_sysGI','f_sysRespiratory','f_sysCardiovascular','f_sysCNS','f_sysSkeletal',
+     'f_investigations','f_differentialDiagnosis','f_provisionalDiagnosis','f_rubrics','f_followupPlan'
+    ].forEach(id => document.getElementById(id).value = '');
     document.getElementById('f_gender').value = '';
     document.getElementById('f_countryCode').value = '+91';
     resetPhotoUI('f');
@@ -922,6 +1096,38 @@
 
     const photoUrls = await uploadPendingPhotos(pendingPhotos);
 
+    const caseHistory = {
+      presentComplaint: document.getElementById('f_presentComplaint').value.trim(),
+      historyOfPresentComplaint: document.getElementById('f_historyOfPresentComplaint').value.trim(),
+      pastHistory: document.getElementById('f_pastHistory').value.trim(),
+      familyHistory: document.getElementById('f_familyHistory').value.trim(),
+      gynecMenarche: document.getElementById('f_gynecMenarche').value.trim(),
+      gynecMenstruation: document.getElementById('f_gynecMenstruation').value.trim(),
+      gynecObstetrical: document.getElementById('f_gynecObstetrical').value.trim(),
+      physicalAppetite: document.getElementById('f_physicalAppetite').value.trim(),
+      physicalDesire: document.getElementById('f_physicalDesire').value.trim(),
+      physicalAversion: document.getElementById('f_physicalAversion').value.trim(),
+      physicalThirst: document.getElementById('f_physicalThirst').value.trim(),
+      physicalUrine: document.getElementById('f_physicalUrine').value.trim(),
+      physicalRespiration: document.getElementById('f_physicalRespiration').value.trim(),
+      physicalSleep: document.getElementById('f_physicalSleep').value.trim(),
+      physicalDreams: document.getElementById('f_physicalDreams').value.trim(),
+      examPigmentation: document.getElementById('f_examPigmentation').value.trim(),
+      examEmaciation: document.getElementById('f_examEmaciation').value.trim(),
+      examBP: document.getElementById('f_examBP').value.trim(),
+      examPulse: document.getElementById('f_examPulse').value.trim(),
+      sysGI: document.getElementById('f_sysGI').value.trim(),
+      sysRespiratory: document.getElementById('f_sysRespiratory').value.trim(),
+      sysCardiovascular: document.getElementById('f_sysCardiovascular').value.trim(),
+      sysCNS: document.getElementById('f_sysCNS').value.trim(),
+      sysSkeletal: document.getElementById('f_sysSkeletal').value.trim(),
+      investigations: document.getElementById('f_investigations').value.trim(),
+      differentialDiagnosis: document.getElementById('f_differentialDiagnosis').value.trim(),
+      provisionalDiagnosis: document.getElementById('f_provisionalDiagnosis').value.trim(),
+      rubrics: document.getElementById('f_rubrics').value.trim(),
+      followupPlan: document.getElementById('f_followupPlan').value.trim(),
+    };
+
     const data = {
       name, age: parseInt(age), gender,
       address: document.getElementById('f_address').value.trim(),
@@ -931,6 +1137,7 @@
       notes: document.getElementById('f_notes').value.trim(),
       caseTaking: document.getElementById('f_caseTaking').value.trim(),
       medicinePrescribed: document.getElementById('f_medicinePrescribed').value.trim(),
+      caseHistory,
       photos: photoUrls,
     };
     try {
