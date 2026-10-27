@@ -875,11 +875,8 @@
     }
   }
 
-  function generatePatientId(createdAt, index) {
-    // Use createdAt timestamp to generate unique ID that won't change
-    const timestamp = new Date(createdAt).getTime();
-    const lastFourDigits = String(timestamp).slice(-4);
-    return 'P-' + lastFourDigits;
+  function generatePatientId(id) {
+    return 'P-' + id;
   }
 
   function renderTable(patients) {
@@ -888,10 +885,8 @@
     if (!patients.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
     const today = new Date().toISOString().split('T')[0];
-    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
     tbody.innerHTML = patients.map((p) => {
-      const idx = allSorted.findIndex(x => x.id === p.id);
-      const pid = generatePatientId(p.createdAt, idx);
+      const pid = generatePatientId(p.id);
       let followupHtml = '—';
       if (p.followupDate) {
         const isOld = p.followupDate < today;
@@ -1175,14 +1170,74 @@
   }
 
   // ---- VIEW MODAL ----
+  function renderViewSection(title, fields) {
+    const populatedFields = fields.filter(([, value]) => value != null && String(value).trim() !== '');
+    if (!populatedFields.length) return '';
+    return `<hr class="divider"/>
+      <h3 style="font-size:0.95rem;font-weight:600;margin-bottom:0.75rem">${title}</h3>
+      <div class="view-grid">${populatedFields.map(([label, value]) => `
+        <div class="view-field full"><label>${label}</label><p style="white-space:pre-wrap">${escapeViewText(value)}</p></div>
+      `).join('')}</div>`;
+  }
+
+  function escapeViewText(value) {
+    return String(value).replace(/[&<>"']/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    })[character]);
+  }
+
   function openViewModal(id) {
     const p = allPatients.find(p => p.id === id);
     if (!p) return;
     viewingPatient = p;
-    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
-    const idx = allSorted.findIndex(x => x.id === p.id);
-    const pid = generatePatientId(p.createdAt, idx);
+    const pid = generatePatientId(p.id);
     const visits = p.visits || [];
+    const ch = p.caseHistory || {};
+    const historySections = [
+      ['1. Present Complaint', [['Present Complaint', ch.presentComplaint]]],
+      ['2. History of Present Complaint', [['History of Present Complaint', ch.historyOfPresentComplaint]]],
+      ['3. Past History', [['Past History', ch.pastHistory]]],
+      ['Mental Generals', [['Mental Generals', ch.mentalGenerals]]],
+      ['4. Family History', [['Family History', ch.familyHistory]]],
+      ['5. Gynecological History', [
+        ['Menarche / Menopause', ch.gynecMenarche],
+        ['Menstruation', ch.gynecMenstruation],
+        ['Obstetrical History', ch.gynecObstetrical],
+      ]],
+      ['6. Physical General', [
+        ['Appetite', ch.physicalAppetite],
+        ['Desire', ch.physicalDesire],
+        ['Aversion', ch.physicalAversion],
+        ['Thirst', ch.physicalThirst],
+        ['Urine', ch.physicalUrine],
+        ['Respiration', ch.physicalRespiration],
+        ['Sleep', ch.physicalSleep],
+        ['Dreams', ch.physicalDreams],
+      ]],
+      ['7. Physical Examination', [
+        ['Pigmentation', ch.examPigmentation],
+        ['Emaciation', ch.examEmaciation],
+        ['BP (Blood Pressure)', ch.examBP],
+        ['Pulse', ch.examPulse],
+      ]],
+      ['8. Systemic Examination', [
+        ['Gastrointestinal System', ch.sysGI],
+        ['Respiratory System', ch.sysRespiratory],
+        ['Cardiovascular System', ch.sysCardiovascular],
+        ['CNS (Central Nervous System)', ch.sysCNS],
+        ['Skeletal System', ch.sysSkeletal],
+      ]],
+      ['9. Laboratory Investigations', [['Laboratory Investigations', ch.investigations]]],
+      ['10. Differential Diagnosis', [['Differential Diagnosis', ch.differentialDiagnosis]]],
+      ['11. Provisional Diagnosis', [['Provisional Diagnosis', ch.provisionalDiagnosis]]],
+      ['12. Rubrics', [['Rubrics', ch.rubrics]]],
+      ['13. Medicine Prescribed', [['Medicine Prescribed', p.medicinePrescribed]]],
+      ['14. Follow-up Plan', [['Follow-up Plan', ch.followupPlan]]],
+    ];
     document.getElementById('viewBody').innerHTML = `
       <div class="view-grid">
         <div class="view-field full" style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
@@ -1198,11 +1253,10 @@
         <div class="view-field"><label>Mobile</label><p>${p.mobile||'—'}</p></div>
         <div class="view-field"><label>Appointment Date</label><p>${p.appointmentDate ? formatDate(p.appointmentDate) : '—'}</p></div>
         <div class="view-field"><label>Follow-up Date</label><p>${p.followupDate ? formatDate(p.followupDate) : '—'}</p></div>
-        
-      <hr class="divider"/>
-      <div class="view-grid">
-        <div class="view-field full"><label>Medicine Prescribed</label><p style="white-space:pre-wrap">${p.medicinePrescribed||'—'}</p></div>
       </div>
+      ${historySections.map(([title, fields]) => renderViewSection(title, fields)).join('')}
+      ${renderViewSection('Case Taking', [['Case Taking', p.caseTaking]])}
+      ${renderViewSection('Notes', [['Notes', p.notes]])}
       <hr class="divider"/>
       <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.75rem">Visit History (${visits.length})</p>
       ${visits.length ? visits.slice().reverse().map(v => {
@@ -1329,7 +1383,7 @@
   function exportCSV() {
     const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
     const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
-    const rows = allSorted.map((p,i) => [generatePatientId(p.createdAt,i), p.name, p.address, p.age, p.gender, p.mobile, p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'\"\'\"')}"` ));
+    const rows = allSorted.map(p => [generatePatientId(p.id), p.name, p.address, p.age, p.gender, p.mobile, p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'\"\'\"')}"` ));
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
@@ -1345,7 +1399,7 @@
     if (lastBackup === today || !allPatients.length) return;
     const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
     const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
-    const rows = allSorted.map((p,i) => [generatePatientId(p.createdAt,i), p.name, p.address, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`));
+    const rows = allSorted.map(p => [generatePatientId(p.id), p.name, p.address, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`));
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
@@ -1383,7 +1437,7 @@
     const filtered = allSorted.filter(p => (p.appointmentDate||'').startsWith(month));
     if (!filtered.length) { showToast('No patients for '+month, 'error'); return; }
     const headers = ['Patient ID','Name','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine'];
-    const rows = filtered.map(p => [generatePatientId(p.createdAt, allSorted.indexOf(p)), p.name, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
+    const rows = filtered.map(p => [generatePatientId(p.id), p.name, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
     const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
@@ -1398,7 +1452,6 @@
     const today = new Date().toISOString().split('T')[0];
     const weekEnd = new Date(Date.now()+7*86400000).toISOString().split('T')[0];
     const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).toISOString().split('T')[0];
-    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
     let list = allPatients.filter(p => p.followupDate).filter(p => {
       if (range==='overdue') return p.followupDate < today;
       if (range==='today') return p.followupDate === today;
@@ -1411,8 +1464,7 @@
     if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
     empty.style.display='none';
     tbody.innerHTML = list.map(p => {
-      const idx = allSorted.findIndex(x=>x.id===p.id);
-      const pid = generatePatientId(p.createdAt, idx);
+      const pid = generatePatientId(p.id);
       const diff = Math.round((new Date(p.followupDate+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
       const diffStr = diff===0 ? '<span style="color:#b45309;font-weight:600">Today</span>'
         : diff<0 ? '<span style="color:#c0392b;font-weight:600">'+Math.abs(diff)+' days overdue</span>'
@@ -1459,10 +1511,8 @@
     if (!total) { tbody.innerHTML=''; empty.style.display='block'; renderPagination(0); return; }
     empty.style.display='none';
     const today = new Date().toISOString().split('T')[0];
-    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
     tbody.innerHTML = page.map(p => {
-      const idx = allSorted.findIndex(x=>x.id===p.id);
-      const pid = generatePatientId(p.createdAt, idx);
+      const pid = generatePatientId(p.id);
       let fHtml='—';
       if(p.followupDate){const isOld=p.followupDate<today;const isSoon=!isOld&&p.followupDate<=new Date(Date.now()+7*86400000).toISOString().split('T')[0];const cls=isOld?'followup-past':isSoon?'followup-soon':'';fHtml='<span class="followup-badge '+cls+'">'+formatDate(p.followupDate)+'</span>';}
       const gBadge = p.gender ? '<span class="gender-badge gender-'+p.gender.toLowerCase()+'">'+p.gender+'</span>' : '';

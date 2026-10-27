@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { randomUUID } = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -72,7 +73,7 @@ app.get('/api/patients/:id', async (req, res) => {
 // POST create patient
 app.post('/api/patients', async (req, res) => {
   try {
-    const newPatient = { id: Date.now().toString(), created_at: new Date().toISOString(), ...req.body };
+    const newPatient = { ...req.body, id: randomUUID(), created_at: new Date().toISOString() };
     const { data, error } = await supabase.from('patients').insert([newPatient]).select();
     if (error) return res.status(500).json(error);
     res.status(201).json(data[0]);
