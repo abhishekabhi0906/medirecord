@@ -39,6 +39,16 @@
     .header-btn:hover { background: var(--accent-hover); }
     .dark-toggle { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.4rem 0.8rem; font-size: 1rem; cursor: pointer; color: var(--muted); transition: all 0.2s; }
     .dark-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .auth-gate { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem; background: var(--bg); }
+    .auth-gate[hidden] { display: none; }
+    .auth-card { width: 100%; max-width: 380px; padding: 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); }
+    .auth-card h1 { margin-bottom: 0.4rem; font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--accent); }
+    .auth-card p { margin-bottom: 1.2rem; color: var(--muted); font-size: 0.9rem; }
+    .auth-card label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; }
+    .auth-card input { width: 100%; padding: 0.7rem 0.8rem; }
+    .auth-card button { width: 100%; margin-top: 1rem; }
+    .auth-error { min-height: 1.2rem; margin-top: 0.65rem; color: var(--danger) !important; }
+    body.auth-locked { overflow: hidden; }
 
     /* TABS */
     .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 2rem; position: sticky; top: 64px; z-index: 99; }
@@ -214,11 +224,23 @@
 </head>
 <body>
 
+<div class="auth-gate" id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <form class="auth-card" id="authForm">
+    <h1 id="authTitle">Maruti Homoeo Clinic</h1>
+    <p>Enter your password to open patient records.</p>
+    <label for="authPassword">Password</label>
+    <input type="password" id="authPassword" autocomplete="current-password" required/>
+    <p class="auth-error" id="authError" role="alert"></p>
+    <button class="header-btn" type="submit" id="authSubmit">Unlock Records</button>
+  </form>
+</div>
+
 <header>
   <div class="logo">Ashwani<span>Patient Management Record</span></div>
   <div class="header-right">
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
     <button class="header-btn" onclick="openAddModal()">+ Add Patient</button>
+    <button class="dark-toggle" id="logoutBtn" type="button" onclick="logout()" hidden>Lock</button>
   </div>
 </header>
 
@@ -674,6 +696,7 @@
   const API = 'https://medirecord-phdg.onrender.com/api/patients';
   const BASE = 'https://medirecord-phdg.onrender.com';
   let allPatients = [];
+  let isAuthenticated = false;
   let editingId = null;
   let deletingId = null;
   let viewingPatient = null;
@@ -682,6 +705,70 @@
   let charts = {};
   let pendingPhotos = [];
   let pendingVisitPhotos = [];
+
+  function setAuthenticated(authenticated) {
+    isAuthenticated = authenticated;
+    document.getElementById('authGate').hidden = authenticated;
+    document.getElementById('logoutBtn').hidden = !authenticated;
+    document.body.classList.toggle('auth-locked', !authenticated);
+    if (authenticated) {
+      document.getElementById('authError').textContent = '';
+    } else {
+      document.getElementById('authPassword').focus();
+    }
+  }
+
+  async function initializeAuthentication() {
+    try {
+      const response = await fetch(BASE + '/api/auth/status', { credentials: 'include' });
+      if (!response.ok) throw new Error('Unable to check authentication status.');
+      const { authenticated } = await response.json();
+      setAuthenticated(authenticated);
+      if (authenticated) {
+        await load();
+        setTimeout(autoBackup, 2000);
+      }
+    } catch (error) {
+      document.getElementById('authError').textContent = 'Cannot connect to the server. Try again later.';
+    }
+  }
+
+  document.getElementById('authForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const submitButton = document.getElementById('authSubmit');
+    const errorMessage = document.getElementById('authError');
+    submitButton.disabled = true;
+    errorMessage.textContent = '';
+    try {
+      const response = await fetch(BASE + '/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: document.getElementById('authPassword').value }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Unable to unlock records.');
+      document.getElementById('authPassword').value = '';
+      setAuthenticated(true);
+      await load();
+      setTimeout(autoBackup, 2000);
+    } catch (error) {
+      errorMessage.textContent = error.message || 'Cannot connect to the server.';
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  async function logout() {
+    try {
+      const response = await fetch(BASE + '/api/auth/logout', { method: 'POST', credentials: 'include' });
+      if (!response.ok) throw new Error('The server could not end the session.');
+      allPatients = [];
+      setAuthenticated(false);
+    } catch (error) {
+      showToast(error.message || 'Unable to lock records. Check the server connection.', 'error');
+    }
+  }
 
   // ---- DARK MODE ----
   function toggleDark() {
@@ -768,7 +855,7 @@
     for (const item of list) {
       if (item.saved) { urls.push(item.url); continue; }
       try {
-        const res = await fetch(BASE + '/api/upload-image', {
+        const res = await apiFetch(BASE + '/api/upload-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dataUrl: item.dataUrl, filename: item.filename || 'photo' })
@@ -791,21 +878,31 @@
   }
 
   // ---- API CALLS ----
+  async function apiFetch(url, options = {}) {
+    const response = await fetch(url, { ...options, credentials: 'include' });
+    if (response.status === 401) {
+      setAuthenticated(false);
+      document.getElementById('authError').textContent = 'Your session expired. Enter your password again.';
+      throw new Error('Your session expired. Enter your password again.');
+    }
+    return response;
+  }
+
   async function fetchPatients(search = '', date = '') {
     let url = API;
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (date) params.append('date', date);
     if (params.toString()) url += '?' + params;
-    const res = await fetch(url);
+    const res = await apiFetch(url);
     return res.json();
   }
   async function createPatient(data) {
-    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await apiFetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     return res.json();
   }
   async function updatePatient(id, data) {
-    const res = await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    const res = await apiFetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     return res.json();
   }
   async function deletePatient(id) {
@@ -820,7 +917,7 @@
             const urlParts = photoUrl.split('/');
             const filename = urlParts[urlParts.length - 1];
             // Delete from storage
-            await fetch(`${BASE}/api/delete-photo`, {
+            await apiFetch(`${BASE}/api/delete-photo`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ filename })
@@ -835,7 +932,7 @@
     }
 
     // Now delete the patient record
-    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`${API}/${id}`, { method: 'DELETE' });
     return res.json();
   }
 
@@ -875,7 +972,7 @@
       renderTable(results);
       updateStats(all, results);
     } catch(e) {
-      showToast('Cannot connect to server. Is the backend running?', 'error');
+      if (isAuthenticated) showToast('Cannot connect to server. Is the backend running?', 'error');
     }
   }
 
@@ -1578,7 +1675,7 @@
 
 
   // Init
-  load().then(() => setTimeout(autoBackup, 2000));
+  initializeAuthentication();
 </script>
 </body>
 </html>
