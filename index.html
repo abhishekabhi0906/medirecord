@@ -215,7 +215,7 @@
 <body>
 
 <header>
-  <div class="logo">Ashwani Homeo Clinic<span>Patient Management Book</span></div>
+  <div class="logo">Ashwani<span>Patient Management Reord</span></div>
   <div class="header-right">
     <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
     <button class="header-btn" onclick="openAddModal()">+ Add Patient</button>
@@ -420,95 +420,101 @@
           <textarea id="f_pastHistory" placeholder="List any major illnesses, surgeries, accidents, vaccinations…" oninput="markDirty()"></textarea>
         </div>
 
+        <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">MENTAL GENERALS</h3></div>
+        <div class="form-group full"><small style="color:var(--muted)">Major General Conditions</small></div>
+        <div class="form-group full">
+          <textarea id="f_mentalGenerals" placeholder="List any major general conditions…" oninput="markDirty()"></textarea>
+        </div>
+
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">4. Family History</h3></div>
         <div class="form-group full">
           <textarea id="f_familyHistory" placeholder="Describe family history of diseases, conditions…" oninput="markDirty()"></textarea>
         </div>
 
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">5. Gynecological History</h3></div>
-        <div class="form-group full"><small style="color:var(--muted)">5a) Menarche / Menopause</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">a) Menarche / Menopause</small></div>
         <div class="form-group full">
           <textarea id="f_gynecMenarche" placeholder="Age of menarche, menopause details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">5b) Menstruation (Duration, Quantity, Cycle, Colour, Clot, Odour, Before/During/After Menses)</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">b) Menstruation (Duration, Quantity, Cycle, Colour, Clot, Odour, Before/During/After Menses)</small></div>
         <div class="form-group full">
           <textarea id="f_gynecMenstruation" placeholder="Menstruation details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">5c) Obstetrical History (Gravida, Parity, Abortion)</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">c) Obstetrical History (Gravida, Parity, Abortion)</small></div>
         <div class="form-group full">
           <textarea id="f_gynecObstetrical" placeholder="Obstetrical history…" oninput="markDirty()"></textarea>
         </div>
 
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">6. Physical General</h3></div>
-        <div class="form-group full"><small style="color:var(--muted)">6a) Appetite</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">a) Appetite</small></div>
         <div class="form-group full">
           <textarea id="f_physicalAppetite" placeholder="Appetite details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6b) Desire</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">b) Desire</small></div>
         <div class="form-group full">
           <textarea id="f_physicalDesire" placeholder="Desires…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6c) Aversion</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">c) Aversion</small></div>
         <div class="form-group full">
           <textarea id="f_physicalAversion" placeholder="Aversions…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6d) Thirst</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">d) Thirst</small></div>
         <div class="form-group full">
           <textarea id="f_physicalThirst" placeholder="Thirst details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6e) Urine</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">e) Urine</small></div>
         <div class="form-group full">
           <textarea id="f_physicalUrine" placeholder="Urine details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6f) Respiration</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">f) Respiration</small></div>
         <div class="form-group full">
           <textarea id="f_physicalRespiration" placeholder="Respiration details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6g) Sleep</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">g) Sleep</small></div>
         <div class="form-group full">
           <textarea id="f_physicalSleep" placeholder="Sleep details…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">6h) Dreams</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">h) Dreams</small></div>
         <div class="form-group full">
           <textarea id="f_physicalDreams" placeholder="Dreams details…" oninput="markDirty()"></textarea>
         </div>
 
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">7. Physical Examination</h3></div>
-        <div class="form-group full"><small style="color:var(--muted)">7a) Pigmentation</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">a) Pigmentation</small></div>
         <div class="form-group full">
           <textarea id="f_examPigmentation" placeholder="Pigmentation observations…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">7b) Emaciation</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">b) Emaciation</small></div>
         <div class="form-group full">
           <textarea id="f_examEmaciation" placeholder="Emaciation observations…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">7c) BP (Blood Pressure)</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">c) BP (Blood Pressure)</small></div>
         <div class="form-group full">
           <input type="text" id="f_examBP" placeholder="e.g., 120/80 mmHg" oninput="markDirty()"/>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">7d) Pulse</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">d) Pulse</small></div>
         <div class="form-group full">
           <input type="text" id="f_examPulse" placeholder="e.g., 72 bpm" oninput="markDirty()"/>
         </div>
 
         <div class="form-group full"><h3 style="margin:1rem 0 0.5rem;color:var(--accent);font-size:1rem">8. Systemic Examination</h3></div>
-        <div class="form-group full"><small style="color:var(--muted)">8a) Gastrointestinal System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">a) Gastrointestinal System</small></div>
         <div class="form-group full">
           <textarea id="f_sysGI" placeholder="GI system examination…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">8b) Respiratory System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">b) Respiratory System</small></div>
         <div class="form-group full">
           <textarea id="f_sysRespiratory" placeholder="Respiratory system examination…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">8c) Cardiovascular System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">c) Cardiovascular System</small></div>
         <div class="form-group full">
           <textarea id="f_sysCardiovascular" placeholder="Cardiovascular system examination…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">8d) CNS (Central Nervous System)</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">d) CNS (Central Nervous System)</small></div>
         <div class="form-group full">
           <textarea id="f_sysCNS" placeholder="CNS examination…" oninput="markDirty()"></textarea>
         </div>
-        <div class="form-group full"><small style="color:var(--muted)">8e) Skeletal System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">e) Skeletal System</small></div>
         <div class="form-group full">
           <textarea id="f_sysSkeletal" placeholder="Skeletal system examination…" oninput="markDirty()"></textarea>
         </div>
@@ -1049,6 +1055,7 @@
     document.getElementById('f_presentComplaint').value = ch.presentComplaint||'';
     document.getElementById('f_historyOfPresentComplaint').value = ch.historyOfPresentComplaint||'';
     document.getElementById('f_pastHistory').value = ch.pastHistory||'';
+    document.getElementById('f_mentalGenerals').value = ch.mentalGenerals||'';
     document.getElementById('f_familyHistory').value = ch.familyHistory||'';
     document.getElementById('f_gynecMenarche').value = ch.gynecMenarche||'';
     document.getElementById('f_gynecMenstruation').value = ch.gynecMenstruation||'';
@@ -1090,8 +1097,7 @@
 
   function clearForm() {
     ['f_name','f_address','f_age','f_mobile','f_appointmentDate','f_followupDate',
-     'f_presentComplaint','f_historyOfPresentComplaint','f_pastHistory','f_familyHistory','f_gynecMenarche','f_gynecMenstruation','f_gynecObstetrical',
-     'f_physicalAppetite','f_physicalDesire','f_physicalAversion','f_physicalThirst','f_physicalUrine','f_physicalRespiration','f_physicalSleep','f_physicalDreams',
+     'f_presentComplaint','f_historyOfPresentComplaint','f_pastHistory','f_mentalGenerals','f_familyHistory','f_gynecMenarche','f_gynecMenstruation','f_gynecObstetrical','f_physicalAppetite','f_physicalDesire','f_physicalAversion','f_physicalThirst','f_physicalUrine','f_physicalRespiration','f_physicalSleep','f_physicalDreams',
      'f_examPigmentation','f_examEmaciation','f_examBP','f_examPulse','f_sysGI','f_sysRespiratory','f_sysCardiovascular','f_sysCNS','f_sysSkeletal',
      'f_investigations','f_differentialDiagnosis','f_provisionalDiagnosis','f_rubrics','f_medicinePrescribed','f_followupPlan'
     ].forEach(id => document.getElementById(id).value = '');
@@ -1119,6 +1125,7 @@
       presentComplaint: document.getElementById('f_presentComplaint').value.trim(),
       historyOfPresentComplaint: document.getElementById('f_historyOfPresentComplaint').value.trim(),
       pastHistory: document.getElementById('f_pastHistory').value.trim(),
+      mentalGenerals: document.getElementById('f_mentalGenerals').value.trim(),
       familyHistory: document.getElementById('f_familyHistory').value.trim(),
       gynecMenarche: document.getElementById('f_gynecMenarche').value.trim(),
       gynecMenstruation: document.getElementById('f_gynecMenstruation').value.trim(),
