@@ -73,7 +73,9 @@ app.get('/api/patients/:id', async (req, res) => {
 // POST create patient
 app.post('/api/patients', async (req, res) => {
   try {
-    const newPatient = { ...req.body, id: randomUUID(), created_at: new Date().toISOString() };
+    const patientData = { ...req.body };
+    delete patientData.patient_number;
+    const newPatient = { ...patientData, id: randomUUID(), created_at: new Date().toISOString() };
     const { data, error } = await supabase.from('patients').insert([newPatient]).select();
     if (error) return res.status(500).json(error);
     res.status(201).json(data[0]);
@@ -85,7 +87,9 @@ app.post('/api/patients', async (req, res) => {
 // PUT update patient
 app.put('/api/patients/:id', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('patients').update(req.body).eq('id', req.params.id).select();
+    const patientUpdates = { ...req.body };
+    delete patientUpdates.patient_number;
+    const { data, error } = await supabase.from('patients').update(patientUpdates).eq('id', req.params.id).select();
     if (error) return res.status(500).json(error);
     res.json(data?.[0] || null);
   } catch(e) {
