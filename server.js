@@ -14,8 +14,8 @@ const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 10;
 const loginAttempts = new Map();
 
-if (!APP_PASSWORD || APP_PASSWORD.length < 12) {
-  throw new Error('APP_PASSWORD must be configured and at least 12 characters long.');
+if (!APP_PASSWORD || APP_PASSWORD.length < 4) {
+  throw new Error('APP_PASSWORD must be configured and at least 4 characters long.');
 }
 if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
   throw new Error('SESSION_SECRET must be configured and at least 32 characters long.');
