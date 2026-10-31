@@ -42,7 +42,7 @@
     .auth-gate { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem; background: var(--bg); }
     .auth-gate[hidden] { display: none; }
     .auth-card { width: 100%; max-width: 380px; padding: 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); }
-    .auth-card h1 { margin-bottom: 0.4rem; font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--accent); }
+    .auth-card h1 { margin-bottom: 0.4rem; font-size: 1.6rem; color: var(--accent); }
     .auth-card p { margin-bottom: 1.2rem; color: var(--muted); font-size: 0.9rem; }
     .auth-card label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; }
     .auth-card input { width: 100%; padding: 0.7rem 0.8rem; }
@@ -978,18 +978,22 @@
           <textarea id="f_sysGI" placeholder="GI system examination…" oninput="markDirty()"></textarea>
         </div>
         <div class="form-group full"><small style="color:var(--muted)">b) Respiratory System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">Inspection: Shape of chest, respiratory movements& any other conspicuous observation, Palpation :Chest movements, trachea, apex beat, tactile vocal fremitus etc. Percussion: Anterirorly, posteriroly,axilla->upper,lower, Auscultation: Breath sounds, added sounds (ronchi, crepitations,pleural rub), vocal resonance etc.</small></div>
         <div class="form-group full">
           <textarea id="f_sysRespiratory" placeholder="Respiratory system examination…" oninput="markDirty()"></textarea>
         </div>
         <div class="form-group full"><small style="color:var(--muted)">c) Cardiovascular System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">Inspection: Precordium, apex impulse, pulsations, scars, dilated veins/arteries & any other conspicuous observations, Palpation: Apex beat, left parasternal heave, diastolic surf, thrills, Percussion: Left border, right border(in case of pericardial effusion) Auscultation: Heart sounds: 1st, 2nd& 3rd sound; murmurs; pericardial friction rub & its radiation.</small></div>
         <div class="form-group full">
           <textarea id="f_sysCardiovascular" placeholder="Cardiovascular system examination…" oninput="markDirty()"></textarea>
         </div>
         <div class="form-group full"><small style="color:var(--muted)">d) CNS (Central Nervous System)</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">Higher functions : Intellect, memory, speech, level of consciousness, Meningeal signs: Neck stiffness, photophobia, Kernig's sign ; Cranial Nerves : Individual nerve examination for 12 cranial nerves; Sensory functions : Spinothalmic sensation (pain, fine touch, temperature),Posterior column sensation (crude touch, position, vibration) Motor functions : Muscle strength & tone, gait,coordination, weakness on movement of muscle (UMN/ LMN lesions)</small></div>
         <div class="form-group full">
           <textarea id="f_sysCNS" placeholder="CNS examination…" oninput="markDirty()"></textarea>
         </div>
         <div class="form-group full"><small style="color:var(--muted)">e) Skeletal System</small></div>
+        <div class="form-group full"><small style="color:var(--muted)">Inspection: Screen for GALS (Gait, Arms, Legs & Spine): deformed shape, swelling etc. Palpation: Temperature, tenderness, swelling etc.Joint movements: Active & Passive; Limitation of movement.</small></div>
         <div class="form-group full">
           <textarea id="f_sysSkeletal" placeholder="Skeletal system examination…" oninput="markDirty()"></textarea>
         </div>
