@@ -732,8 +732,8 @@
       </select>
       <button class="clear-btn" onclick="clearFilters()">Clear</button>
       <button class="clear-btn" onclick="window.print()">🖨</button>
-      <button class="clear-btn" onclick="exportCSV()">⬇ CSV</button>
-      <button class="clear-btn" onclick="exportMonthlyReport()">Monthly Report</button>
+      <button class="clear-btn" onclick="exportPDF()">⬇ Export PDF</button>
+      <button class="clear-btn" onclick="exportMonthlyReport()">Monthly PDF Report</button>
     </div>
 
     <div class="stats">
@@ -1951,17 +1951,89 @@
     catch(e) { showToast('Error deleting.', 'error'); }
   }
 
-  // ---- EXPORT CSV ----
-  function exportCSV() {
-    const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
-    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
-    const rows = allSorted.map(p => [generatePatientId(p), p.name, p.address, p.age, p.gender, p.mobile, p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'\"\'\"')}"` ));
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-    a.download = 'patients_'+new Date().toISOString().split('T')[0]+'.csv';
-    a.click();
-    showToast('CSV exported!', 'success');
+  // ---- PDF EXPORT ----
+  function exportLabel(key) {
+    return key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, character => character.toUpperCase());
+  }
+
+  function renderExportValue(value, key = '') {
+    if (value === null || value === undefined || value === '') return '<span class="empty">—</span>';
+    if (Array.isArray(value)) {
+      if (!value.length) return '<span class="empty">—</span>';
+      return '<ol>' + value.map(item => '<li>' + renderExportValue(item, key) + '</li>').join('') + '</ol>';
+    }
+    if (typeof value === 'object') {
+      const entries = Object.entries(value);
+      if (!entries.length) return '<span class="empty">—</span>';
+      return '<dl>' + entries.map(([childKey, childValue]) =>
+        '<div class="detail"><dt>' + escapeViewText(exportLabel(childKey)) + '</dt><dd>' +
+        renderExportValue(childValue, childKey) + '</dd></div>'
+      ).join('') + '</dl>';
+    }
+
+    const text = escapeViewText(value);
+    if (/^https?:\/\//i.test(String(value))) return '<a href="' + text + '">' + text + '</a>';
+    return text;
+  }
+
+  function printPdfReport(title, subtitle, patients, filename) {
+    if (!patients.length) {
+      showToast('There are no patient records to export.', 'error');
+      return;
+    }
+    const win = window.open('', '_blank');
+    if (!win) {
+      showToast('Allow pop-ups to create the PDF report.', 'error');
+      return;
+    }
+
+    const records = patients.map(patient => `
+      <article class="patient">
+        <h2>${escapeViewText(generatePatientId(patient))} — ${escapeViewText(patient.name || 'Patient')}</h2>
+        <dl>${Object.entries(patient).map(([key, value]) => `
+          <div class="detail">
+            <dt>${escapeViewText(exportLabel(key))}</dt>
+            <dd>${renderExportValue(value, key)}</dd>
+          </div>
+        `).join('')}</dl>
+      </article>
+    `).join('');
+    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+      <title>${escapeViewText(filename.replace(/\.pdf$/i, ''))}</title>
+      <style>
+        @page { size: A4; margin: 14mm; }
+        * { box-sizing: border-box; }
+        body { font: 10pt Arial, sans-serif; color: #17211c; margin: 0; }
+        h1 { color: #245b43; font-size: 20pt; margin: 0 0 4pt; }
+        .subtitle { color: #58635d; margin: 0 0 18pt; }
+        .patient { border-top: 2px solid #245b43; padding: 12pt 0; page-break-inside: avoid; }
+        .patient + .patient { page-break-before: always; }
+        h2 { color: #245b43; font-size: 14pt; margin: 0 0 10pt; }
+        dl { margin: 0; }
+        .detail { display: grid; grid-template-columns: 31% 1fr; gap: 8pt; border-bottom: 1px solid #e1e6e2; padding: 5pt 0; }
+        dt { font-weight: 700; overflow-wrap: anywhere; }
+        dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .empty { color: #7a817d; }
+        ol { margin: 0; padding-left: 18pt; }
+        li { margin: 0 0 8pt; }
+        a { color: #245b43; overflow-wrap: anywhere; }
+        @media screen { body { max-width: 900px; margin: 24px auto; padding: 24px; } }
+      </style></head><body>
+      <h1>${escapeViewText(title)}</h1>
+      <p class="subtitle">${escapeViewText(subtitle)} · ${patients.length} patient${patients.length === 1 ? '' : 's'} · Generated ${escapeViewText(new Date().toLocaleString('en-IN'))}</p>
+      ${records}
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 250);
+    showToast('Choose “Save as PDF” in the print dialog to download.', 'success');
+  }
+
+  function exportPDF() {
+    const allSorted = [...allPatients].sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
+    const today = new Date().toISOString().split('T')[0];
+    printPdfReport('Patient Records Export', 'Complete patient records', allSorted, 'patients_' + today + '.pdf');
   }
 
   // ---- AUTO BACKUP ----
@@ -1969,13 +2041,10 @@
     const today = new Date().toISOString().split('T')[0];
     const lastBackup = localStorage.getItem('lastBackup');
     if (lastBackup === today || !allPatients.length) return;
-    const allSorted = [...allPatients].sort((a,b) => new Date(a.createdAt)-new Date(b.createdAt));
-    const headers = ['Patient ID','Name','Address','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine Prescribed'];
-    const rows = allSorted.map(p => [generatePatientId(p), p.name, p.address, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`));
-    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const backup = JSON.stringify({ exportedAt: new Date().toISOString(), patients: allPatients }, null, 2);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-    a.download = 'backup_'+today+'.csv';
+    a.href = URL.createObjectURL(new Blob([backup], {type:'application/json'}));
+    a.download = 'backup_'+today+'.json';
     a.click();
     localStorage.setItem('lastBackup', today);
     showToast('Daily backup saved!', 'success');
@@ -2001,21 +2070,14 @@
   document.getElementById('visitOverlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeVisitModal(); });
 
 
-  // ---- MONTHLY REPORT ----
+  // ---- MONTHLY PDF REPORT ----
   function exportMonthlyReport() {
     const month = prompt('Enter month (YYYY-MM):', new Date().toISOString().slice(0,7));
     if (!month || !/^\d{4}-\d{2}$/.test(month)) { showToast('Invalid format. Use YYYY-MM', 'error'); return; }
-    const allSorted = [...allPatients].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    const allSorted = [...allPatients].sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
     const filtered = allSorted.filter(p => (p.appointmentDate||'').startsWith(month));
     if (!filtered.length) { showToast('No patients for '+month, 'error'); return; }
-    const headers = ['Patient ID','Name','Age','Gender','Mobile','Appointment Date','Follow-up Date','Case Taking','Medicine'];
-    const rows = filtered.map(p => [generatePatientId(p), p.name, p.age, p.gender, cleanMobile(p.mobile), p.appointmentDate, p.followupDate, p.caseTaking, p.medicinePrescribed].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
-    const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-    a.download = 'report_'+month+'.csv';
-    a.click();
-    showToast('Monthly report: '+filtered.length+' patients exported!','success');
+    printPdfReport('Monthly Patient Report', month, filtered, 'report_' + month + '.pdf');
   }
 
   // ---- FOLLOW-UP TAB RENDER ----
