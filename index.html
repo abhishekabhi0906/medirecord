@@ -6,6 +6,7 @@
   <title>Ashwani - Patient Management</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1957,83 +1958,133 @@
       .replace(/\b\w/g, character => character.toUpperCase());
   }
 
-  function renderExportValue(value, key = '') {
-    if (value === null || value === undefined || value === '') return '<span class="empty">—</span>';
+  function collectExportFields(value, label, fields) {
+    if (value === null || value === undefined || value === '') {
+      fields.push([label, '—']);
+      return;
+    }
     if (Array.isArray(value)) {
-      if (!value.length) return '<span class="empty">—</span>';
-      return '<ol>' + value.map(item => '<li>' + renderExportValue(item, key) + '</li>').join('') + '</ol>';
+      if (!value.length) {
+        fields.push([label, '—']);
+        return;
+      }
+      value.forEach((item, index) => collectExportFields(item, label + ' ' + (index + 1), fields));
+      return;
     }
     if (typeof value === 'object') {
       const entries = Object.entries(value);
-      if (!entries.length) return '<span class="empty">—</span>';
-      return '<dl>' + entries.map(([childKey, childValue]) =>
-        '<div class="detail"><dt>' + escapeViewText(exportLabel(childKey)) + '</dt><dd>' +
-        renderExportValue(childValue, childKey) + '</dd></div>'
-      ).join('') + '</dl>';
+      if (!entries.length) {
+        fields.push([label, '—']);
+        return;
+      }
+      entries.forEach(([childKey, childValue]) =>
+        collectExportFields(childValue, label + ' — ' + exportLabel(childKey), fields)
+      );
+      return;
     }
-
-    const text = escapeViewText(value);
-    if (/^https?:\/\//i.test(String(value))) return '<a href="' + text + '">' + text + '</a>';
-    return text;
+    fields.push([label, String(value)]);
   }
 
-  function printPdfReport(title, subtitle, patients, filename) {
+  function downloadPdfReport(title, subtitle, patients, filename) {
     if (!patients.length) {
       showToast('There are no patient records to export.', 'error');
       return;
     }
-    const win = window.open('', '_blank');
-    if (!win) {
-      showToast('Allow pop-ups to create the PDF report.', 'error');
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      showToast('PDF generator failed to load. Check your internet connection and try again.', 'error');
       return;
     }
 
-    const records = patients.map(patient => `
-      <article class="patient">
-        <h2>${escapeViewText(generatePatientId(patient))} — ${escapeViewText(patient.name || 'Patient')}</h2>
-        <dl>${Object.entries(patient).map(([key, value]) => `
-          <div class="detail">
-            <dt>${escapeViewText(exportLabel(key))}</dt>
-            <dd>${renderExportValue(value, key)}</dd>
-          </div>
-        `).join('')}</dl>
-      </article>
-    `).join('');
-    win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
-      <title>${escapeViewText(filename.replace(/\.pdf$/i, ''))}</title>
-      <style>
-        @page { size: A4; margin: 14mm; }
-        * { box-sizing: border-box; }
-        body { font: 10pt Arial, sans-serif; color: #17211c; margin: 0; }
-        h1 { color: #245b43; font-size: 20pt; margin: 0 0 4pt; }
-        .subtitle { color: #58635d; margin: 0 0 18pt; }
-        .patient { border-top: 2px solid #245b43; padding: 12pt 0; page-break-inside: avoid; }
-        .patient + .patient { page-break-before: always; }
-        h2 { color: #245b43; font-size: 14pt; margin: 0 0 10pt; }
-        dl { margin: 0; }
-        .detail { display: grid; grid-template-columns: 31% 1fr; gap: 8pt; border-bottom: 1px solid #e1e6e2; padding: 5pt 0; }
-        dt { font-weight: 700; overflow-wrap: anywhere; }
-        dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-        .empty { color: #7a817d; }
-        ol { margin: 0; padding-left: 18pt; }
-        li { margin: 0 0 8pt; }
-        a { color: #245b43; overflow-wrap: anywhere; }
-        @media screen { body { max-width: 900px; margin: 24px auto; padding: 24px; } }
-      </style></head><body>
-      <h1>${escapeViewText(title)}</h1>
-      <p class="subtitle">${escapeViewText(subtitle)} · ${patients.length} patient${patients.length === 1 ? '' : 's'} · Generated ${escapeViewText(new Date().toLocaleString('en-IN'))}</p>
-      ${records}
-    </body></html>`);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 250);
-    showToast('Choose “Save as PDF” in the print dialog to download.', 'success');
+    try {
+      const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      const contentWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(36, 91, 67);
+      doc.text(title, margin, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(88, 99, 93);
+      doc.text(subtitle + ' | ' + patients.length + ' patient(s) | Generated ' + new Date().toLocaleString('en-IN'), margin, y);
+      y += 9;
+
+      function ensureSpace(height) {
+        if (y + height > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+      }
+
+      function writeWrappedLines(lines, x, lineHeight) {
+        lines.forEach(line => {
+          ensureSpace(lineHeight);
+          doc.text(line, x, y);
+          y += lineHeight;
+        });
+      }
+
+      patients.forEach((patient, index) => {
+        ensureSpace(12);
+        doc.setDrawColor(36, 91, 67);
+        doc.setLineWidth(0.6);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 6;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(36, 91, 67);
+        const patientHeading = generatePatientId(patient) + ' - ' + (patient.name || 'Patient');
+        const headingLines = doc.splitTextToSize(patientHeading, contentWidth);
+        writeWrappedLines(headingLines, margin, 6);
+        y += 2;
+
+        const fields = [];
+        Object.entries(patient).forEach(([key, value]) =>
+          collectExportFields(value, exportLabel(key), fields)
+        );
+        fields.forEach(([label, value]) => {
+          doc.setFontSize(9);
+          const labelLines = doc.splitTextToSize(label, contentWidth);
+          const valueLines = doc.splitTextToSize(value, contentWidth);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(45, 54, 49);
+          writeWrappedLines(labelLines, margin, 4);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(35, 40, 37);
+          writeWrappedLines(valueLines, margin, 4);
+          y += 3;
+        });
+        if (index < patients.length - 1) y += 3;
+      });
+
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let page = 1; page <= pageCount; page++) {
+        doc.setPage(page);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(120, 128, 123);
+        doc.text('Page ' + page + ' of ' + pageCount, pageWidth - margin, pageHeight - 7, { align: 'right' });
+      }
+
+      doc.save(filename);
+      showToast('PDF downloaded!', 'success');
+    } catch (error) {
+      console.error('Unable to generate PDF report:', error);
+      showToast('Could not generate the PDF. Please try again.', 'error');
+    }
   }
 
   function exportPDF() {
     const allSorted = [...allPatients].sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
     const today = new Date().toISOString().split('T')[0];
-    printPdfReport('Patient Records Export', 'Complete patient records', allSorted, 'patients_' + today + '.pdf');
+    downloadPdfReport('Patient Records Export', 'Complete patient records', allSorted, 'patients_' + today + '.pdf');
   }
 
   // ---- AUTO BACKUP ----
@@ -2077,7 +2128,7 @@
     const allSorted = [...allPatients].sort((a, b) => new Date(a.createdAt || a.created_at) - new Date(b.createdAt || b.created_at));
     const filtered = allSorted.filter(p => (p.appointmentDate||'').startsWith(month));
     if (!filtered.length) { showToast('No patients for '+month, 'error'); return; }
-    printPdfReport('Monthly Patient Report', month, filtered, 'report_' + month + '.pdf');
+    downloadPdfReport('Monthly Patient Report', month, filtered, 'report_' + month + '.pdf');
   }
 
   // ---- FOLLOW-UP TAB RENDER ----
